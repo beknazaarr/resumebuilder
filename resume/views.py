@@ -2,6 +2,8 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter, OrderingFilter
 from .models import Resume
 from .serializers import (
     ResumeListSerializer,
@@ -14,6 +16,11 @@ class ResumeListView(generics.ListAPIView):
     """Список всех резюме текущего пользователя"""
     serializer_class = ResumeListSerializer
     permission_classes = [permissions.IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = ['is_primary', 'template']
+    search_fields = ['title']
+    ordering_fields = ['created_at', 'updated_at', 'title']
+    ordering = ['-updated_at']
 
     def get_queryset(self):
         return Resume.objects.filter(user=self.request.user)
@@ -44,6 +51,38 @@ class ResumeDetailView(generics.RetrieveAPIView):
         return Resume.objects.filter(user=self.request.user)
 
 
+class ResumePreviewView(APIView):
+    """Предпросмотр резюме в реальном времени (возвращает HTML)"""
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get(self, request, pk):
+        resume = get_object_or_404(Resume, pk=pk, user=request.user)
+        
+        # Получаем шаблон
+        if not resume.template:
+            return Response({
+                'error': 'Для резюме не выбран шаблон'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Формируем данные для предпросмотра
+        context = {
+            'resume': resume,
+            'personal_info': getattr(resume, 'personal_info', None),
+            'education': resume.education.all(),
+            'work_experience': resume.work_experience.all(),
+            'skills': resume.skills.all(),
+            'achievements': resume.achievements.all(),
+            'languages': resume.languages.all(),
+        }
+        
+        # Возвращаем HTML и CSS
+        return Response({
+            'html': resume.template.html_structure,
+            'css': resume.template.css_styles,
+            'data': ResumeDetailSerializer(resume).data
+        })
+
+
 class ResumeUpdateView(generics.UpdateAPIView):
     """Обновление резюме"""
     serializer_class = ResumeCreateUpdateSerializer
@@ -51,6 +90,18 @@ class ResumeUpdateView(generics.UpdateAPIView):
 
     def get_queryset(self):
         return Resume.objects.filter(user=self.request.user)
+    
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        
+        return Response({
+            'message': 'Резюме успешно обновлено',
+            'resume': ResumeDetailSerializer(instance).data
+        })
 
 
 class ResumeDeleteView(generics.DestroyAPIView):
@@ -62,9 +113,11 @@ class ResumeDeleteView(generics.DestroyAPIView):
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
+        resume_title = instance.title
         self.perform_destroy(instance)
+        
         return Response({
-            'message': 'Резюме успешно удалено'
+            'message': f'Резюме "{resume_title}" успешно удалено'
         }, status=status.HTTP_204_NO_CONTENT)
 
 
@@ -160,7 +213,7 @@ class ResumeCopyView(APIView):
             )
         
         return Response({
-            'message': 'Резюме успешно скопировано',
+            'message': f'Резюме "{original_resume.title}" успешно скопировано',
             'resume': ResumeDetailSerializer(new_resume).data
         }, status=status.HTTP_201_CREATED)
 
@@ -180,6 +233,6 @@ class ResumeSetPrimaryView(APIView):
         resume.save()
         
         return Response({
-            'message': 'Резюме установлено как основное',
+            'message': f'Резюме "{resume.title}" установлено как основное',
             'resume': ResumeListSerializer(resume).data
         })

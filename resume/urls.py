@@ -23,6 +23,10 @@ urlpatterns = [
     path('<int:pk>/delete/', ResumeDeleteView.as_view(), name='delete'),
     path('<int:pk>/copy/', ResumeCopyView.as_view(), name='copy'),
     path('<int:pk>/set-primary/', ResumeSetPrimaryView.as_view(), name='set_primary'),
+    path('<int:pk>/preview/', ResumeDetailView.as_view(), name='preview'),
+    path('<int:pk>/preview/html/', ResumeDetailView.as_view(), name='preview_html'),
+    path('<int:pk>/preview/pdf/', ResumeDetailView.as_view(), name='preview_pdf'),
+    path('<int:pk>/preview/docx/', ResumeDetailView.as_view(), name='preview_docx'),
     
     # Экспорт
     path('<int:pk>/export/pdf/', ResumeExportPDFView.as_view(), name='export_pdf'),
