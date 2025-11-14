@@ -1,11 +1,5 @@
 from django.contrib import admin
-from .models import Achievement
 
-
-@admin.register(Achievement)
-class AchievementAdmin(admin.ModelAdmin):
-    list_display = ('title', 'date', 'resume')
-    list_filter = ('date', 'resume__user')
-    search_fields = ('title', 'description')
-
-
+# Достижения управляются только через резюме пользователя
+# Админ не должен иметь возможность создавать/редактировать достижения напрямую
+# Все операции доступны только через API для владельца резюме

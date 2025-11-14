@@ -1,9 +1,5 @@
 from django.contrib import admin
-from .models import PersonalInfo
 
-
-@admin.register(PersonalInfo)
-class PersonalInfoAdmin(admin.ModelAdmin):
-    list_display = ('full_name', 'email', 'phone', 'resume')
-    search_fields = ('full_name', 'email', 'phone')
-    list_filter = ('resume__user',)
+# Личная информация управляется только через резюме пользователя
+# Админ не должен иметь возможность создавать/редактировать личную информацию напрямую
+# Все операции доступны только через API для владельца резюме

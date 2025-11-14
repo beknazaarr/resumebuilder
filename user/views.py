@@ -33,7 +33,7 @@ class UserRegistrationView(generics.CreateAPIView):
             'user': UserSerializer(user).data,
             'refresh': str(refresh),
             'access': str(refresh.access_token),
-            'message': 'Пользователь успешно зарегистрирован'
+            'message': 'Регистрация прошла успешно. Добро пожаловать!'
         }, status=status.HTTP_201_CREATED)
 
 
@@ -56,13 +56,19 @@ class UserLoginView(APIView):
 
         if user is None:
             return Response({
-                'error': 'Неверные учетные данные'
+                'error': 'Неверное имя пользователя или пароль'
             }, status=status.HTTP_401_UNAUTHORIZED)
+
+        # Проверка активности аккаунта
+        if not user.is_active:
+            return Response({
+                'error': 'Ваш аккаунт деактивирован. Обратитесь к администратору.'
+            }, status=status.HTTP_403_FORBIDDEN)
 
         # Проверка блокировки
         if user.is_blocked:
             return Response({
-                'error': 'Ваш аккаунт заблокирован. Обратитесь к администратору.'
+                'error': 'Ваш аккаунт заблокирован. Обратитесь к администратору для разблокировки.'
             }, status=status.HTTP_403_FORBIDDEN)
 
         # Генерируем токены
@@ -72,7 +78,7 @@ class UserLoginView(APIView):
             'user': UserSerializer(user).data,
             'refresh': str(refresh),
             'access': str(refresh.access_token),
-            'message': 'Вход выполнен успешно'
+            'message': f'Добро пожаловать, {user.first_name or user.username}!'
         })
 
 
@@ -88,6 +94,19 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
         if self.request.method == 'GET':
             return UserSerializer
         return UserProfileUpdateSerializer
+    
+    def update(self, request, *args, **kwargs):
+        """Обновление профиля с кастомным ответом"""
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        
+        return Response({
+            'message': 'Профиль успешно обновлен',
+            'user': UserSerializer(instance).data
+        })
 
 
 class ChangePasswordView(APIView):
@@ -103,7 +122,13 @@ class ChangePasswordView(APIView):
             # Проверяем старый пароль
             if not user.check_password(serializer.data.get('old_password')):
                 return Response({
-                    'error': 'Неверный старый пароль'
+                    'error': 'Неверный текущий пароль'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Проверяем, что новый пароль отличается от старого
+            if serializer.data.get('old_password') == serializer.data.get('new_password'):
+                return Response({
+                    'error': 'Новый пароль должен отличаться от текущего'
                 }, status=status.HTTP_400_BAD_REQUEST)
             
             # Устанавливаем новый пароль
@@ -111,7 +136,7 @@ class ChangePasswordView(APIView):
             user.save()
             
             return Response({
-                'message': 'Пароль успешно изменен'
+                'message': 'Пароль успешно изменен. Используйте новый пароль для входа.'
             }, status=status.HTTP_200_OK)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -125,8 +150,12 @@ class AdminUserListView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = ['is_blocked', 'is_active', 'is_staff']
     search_fields = ['username', 'email', 'first_name', 'last_name']
-    ordering_fields = ['created_at', 'username', 'email']
+    ordering_fields = ['created_at', 'username', 'email', 'last_login']
     ordering = ['-created_at']
+    
+    def get_queryset(self):
+        """Оптимизация запросов с подсчетом резюме"""
+        return User.objects.prefetch_related('resumes')
 
 
 class AdminUserDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -135,7 +164,28 @@ class AdminUserDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = AdminUserManagementSerializer
     permission_classes = [permissions.IsAdminUser]
     
+    def update(self, request, *args, **kwargs):
+        """Обновление пользователя с проверками"""
+        instance = self.get_object()
+        
+        # Запрещаем изменять статус суперпользователя
+        if instance.is_superuser and not request.user.is_superuser:
+            return Response({
+                'error': 'Вы не можете изменять данные суперпользователя'
+            }, status=status.HTTP_403_FORBIDDEN)
+        
+        partial = kwargs.pop('partial', False)
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        
+        return Response({
+            'message': f'Данные пользователя {instance.username} успешно обновлены',
+            'user': serializer.data
+        })
+    
     def destroy(self, request, *args, **kwargs):
+        """Удаление пользователя с проверками"""
         instance = self.get_object()
         
         # Запрещаем удалять самого себя
@@ -151,10 +201,13 @@ class AdminUserDetailView(generics.RetrieveUpdateDestroyAPIView):
             }, status=status.HTTP_400_BAD_REQUEST)
         
         username = instance.username
+        resumes_count = instance.resumes.count()
+        
+        # Удаляем пользователя (резюме удалятся автоматически по CASCADE)
         self.perform_destroy(instance)
         
         return Response({
-            'message': f'Пользователь {username} успешно удален'
+            'message': f'Пользователь {username} и его {resumes_count} резюме успешно удалены'
         }, status=status.HTTP_204_NO_CONTENT)
 
 
@@ -182,8 +235,10 @@ class AdminBlockUserView(APIView):
             user.is_blocked = not user.is_blocked
             user.save()
             
+            action = "заблокирован" if user.is_blocked else "разблокирован"
+            
             return Response({
-                'message': f'Пользователь {user.username} {"заблокирован" if user.is_blocked else "разблокирован"}',
+                'message': f'Пользователь {user.username} успешно {action}',
                 'is_blocked': user.is_blocked,
                 'user': AdminUserManagementSerializer(user).data
             })

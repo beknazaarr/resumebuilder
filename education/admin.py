@@ -1,9 +1,5 @@
 from django.contrib import admin
-from .models import Education
 
-
-@admin.register(Education)
-class EducationAdmin(admin.ModelAdmin):
-    list_display = ('institution', 'degree', 'field_of_study', 'start_date', 'end_date', 'resume')
-    list_filter = ('degree', 'start_date', 'resume__user')
-    search_fields = ('institution', 'field_of_study')
+# Образование управляется только через резюме пользователя
+# Админ не должен иметь возможность создавать/редактировать образование напрямую
+# Все операции доступны только через API для владельца резюме
