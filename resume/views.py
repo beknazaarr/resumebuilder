@@ -4,6 +4,7 @@ from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
+from django.template.loader import render_to_string
 from .models import Resume
 from .serializers import (
     ResumeListSerializer,
@@ -52,19 +53,19 @@ class ResumeDetailView(generics.RetrieveAPIView):
 
 
 class ResumePreviewView(APIView):
-    """Предпросмотр резюме в реальном времени (возвращает HTML)"""
+    """Предпросмотр резюме в реальном времени"""
     permission_classes = [permissions.IsAuthenticated]
     
     def get(self, request, pk):
         resume = get_object_or_404(Resume, pk=pk, user=request.user)
         
-        # Получаем шаблон
+        # Проверяем наличие шаблона
         if not resume.template:
             return Response({
                 'error': 'Для резюме не выбран шаблон'
             }, status=status.HTTP_400_BAD_REQUEST)
         
-        # Формируем данные для предпросмотра
+        # Получаем все связанные данные
         context = {
             'resume': resume,
             'personal_info': getattr(resume, 'personal_info', None),
@@ -75,12 +76,21 @@ class ResumePreviewView(APIView):
             'languages': resume.languages.all(),
         }
         
-        # Возвращаем HTML и CSS
-        return Response({
-            'html': resume.template.html_structure,
-            'css': resume.template.css_styles,
-            'data': ResumeDetailSerializer(resume).data
-        })
+        # Формируем HTML с данными
+        try:
+            # Рендерим HTML шаблон с данными
+            html_with_data = render_to_string('resume/preview_template.html', context)
+            
+            return Response({
+                'html': html_with_data,
+                'css': resume.template.css_styles,
+                'template_html': resume.template.html_structure,
+                'data': ResumeDetailSerializer(resume).data
+            })
+        except Exception as e:
+            return Response({
+                'error': f'Ошибка при формировании предпросмотра: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class ResumeUpdateView(generics.UpdateAPIView):
@@ -114,15 +124,20 @@ class ResumeDeleteView(generics.DestroyAPIView):
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         resume_title = instance.title
+        
+        # Проверяем, не является ли это единственным резюме пользователя
+        user_resumes_count = Resume.objects.filter(user=request.user).count()
+        
         self.perform_destroy(instance)
         
         return Response({
-            'message': f'Резюме "{resume_title}" успешно удалено'
+            'message': f'Резюме "{resume_title}" успешно удалено',
+            'remaining_resumes': user_resumes_count - 1
         }, status=status.HTTP_204_NO_CONTENT)
 
 
 class ResumeCopyView(APIView):
-    """Копирование существующего резюме"""
+    """Копирование существующего резюме со всеми связанными данными"""
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, pk):

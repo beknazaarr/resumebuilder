@@ -7,6 +7,7 @@ from .views import (
     ResumeDeleteView,
     ResumeCopyView,
     ResumeSetPrimaryView,
+    ResumePreviewView,
 )
 from .export_views import (
     ResumeExportPDFView,
@@ -16,17 +17,19 @@ from .export_views import (
 app_name = 'resume'
 
 urlpatterns = [
+    # Основные операции с резюме
     path('', ResumeListView.as_view(), name='list'),
     path('create/', ResumeCreateView.as_view(), name='create'),
     path('<int:pk>/', ResumeDetailView.as_view(), name='detail'),
     path('<int:pk>/update/', ResumeUpdateView.as_view(), name='update'),
     path('<int:pk>/delete/', ResumeDeleteView.as_view(), name='delete'),
+    
+    # Дополнительные операции
     path('<int:pk>/copy/', ResumeCopyView.as_view(), name='copy'),
     path('<int:pk>/set-primary/', ResumeSetPrimaryView.as_view(), name='set_primary'),
-    path('<int:pk>/preview/', ResumeDetailView.as_view(), name='preview'),
-    path('<int:pk>/preview/html/', ResumeDetailView.as_view(), name='preview_html'),
-    path('<int:pk>/preview/pdf/', ResumeDetailView.as_view(), name='preview_pdf'),
-    path('<int:pk>/preview/docx/', ResumeDetailView.as_view(), name='preview_docx'),
+    
+    # Предпросмотр
+    path('<int:pk>/preview/', ResumePreviewView.as_view(), name='preview'),
     
     # Экспорт
     path('<int:pk>/export/pdf/', ResumeExportPDFView.as_view(), name='export_pdf'),

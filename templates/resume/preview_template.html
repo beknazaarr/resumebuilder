@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ personal_info.full_name|default:"Резюме" }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+        
+        .resume-container {
+            max-width: 210mm;
+            margin: 20px auto;
+            background-color: white;
+            padding: 40px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        /* Шапка резюме */
+        .resume-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 3px solid #2c3e50;
+        }
+        
+        .resume-header h1 {
+            color: #2c3e50;
+            font-size: 36px;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        .contact-info {
+            font-size: 15px;
+            color: #555;
+            line-height: 1.8;
+        }
+        
+        .contact-info a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        
+        .contact-info a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Секции */
+        .section {
+            margin-bottom: 35px;
+        }
+        
+        .section-title {
+            color: #2c3e50;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ecf0f1;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* О себе */
+        .summary {
+            text-align: justify;
+            color: #555;
+            font-size: 15px;
+            line-height: 1.8;
+        }
+        
+        /* Элементы списка */
+        .item {
+            margin-bottom: 25px;
+            padding-left: 20px;
+            border-left: 3px solid #3498db;
+        }
+        
+        .item-title {
+            color: #2c3e50;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .item-subtitle {
+            color: #7f8c8d;
+            font-size: 15px;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        .item-date {
+            color: #95a5a6;
+            font-size: 14px;
+            font-style: italic;
+            margin-bottom: 10px;
+        }
+        
+        .item-description {
+            color: #555;
+            font-size: 14px;
+            text-align: justify;
+            line-height: 1.7;
+        }
+        
+        /* Навыки */
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .skill-item {
+            padding: 12px 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 8px;
+            font-size: 14px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .skill-level {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-top: 4px;
+        }
+        
+        /* Языки */
+        .languages-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        
+        .language-item {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        /* Достижения */
+        .achievement-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #27ae60;
+        }
+        
+        .achievement-title {
+            color: #27ae60;
+            font-weight: 700;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+        
+        /* Пустое состояние */
+        .empty-state {
+            text-align: center;
+            color: #95a5a6;
+            font-style: italic;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="resume-container">
+        <!-- Шапка с личной информацией -->
+        {% if personal_info %}
+        <div class="resume-header">
+            <h1>{{ personal_info.full_name }}</h1>
+            <div class="contact-info">
+                {% if personal_info.phone %}
+                    📞 {{ personal_info.phone }}
+                {% endif %}
+                {% if personal_info.email %}
+                    {% if personal_info.phone %} | {% endif %}
+                    📧 <a href="mailto:{{ personal_info.email }}">{{ personal_info.email }}</a>
+                {% endif %}
+                {% if personal_info.address %}
+                    <br>📍 {{ personal_info.address }}
+                {% endif %}
+                {% if personal_info.linkedin or personal_info.website %}
+                    <br>
+                    {% if personal_info.linkedin %}
+                        🔗 <a href="{{ personal_info.linkedin }}" target="_blank">LinkedIn</a>
+                    {% endif %}
+                    {% if personal_info.website %}
+                        {% if personal_info.linkedin %} | {% endif %}
+                        🌐 <a href="{{ personal_info.website }}" target="_blank">Website</a>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- О себе -->
+        {% if personal_info.summary %}
+        <div class="section">
+            <h2 class="section-title">О себе</h2>
+            <p class="summary">{{ personal_info.summary }}</p>
+        </div>
+        {% endif %}
+        {% else %}
+        <div class="resume-header">
+            <h1>Ваше имя</h1>
+            <div class="contact-info">
+                <p class="empty-state">Добавьте личную информацию</p>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Опыт работы -->
+        {% if work_experience %}
+        <div class="section">
+            <h2 class="section-title">Опыт работы</h2>
+            {% for work in work_experience %}
+            <div class="item">
+                <div class="item-title">{{ work.position }}</div>
+                <div class="item-subtitle">{{ work.company }}</div>
+                <div class="item-date">
+                    {{ work.start_date|date:"F Y" }} - 
+                    {% if work.is_current %}
+                        настоящее время
+                    {% elif work.end_date %}
+                        {{ work.end_date|date:"F Y" }}
+                    {% endif %}
+                </div>
+                {% if work.description %}
+                <p class="item-description">{{ work.description }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <!-- Образование -->
+        {% if education %}
+        <div class="section">
+            <h2 class="section-title">Образование</h2>
+            {% for edu in education %}
+            <div class="item">
+                <div class="item-title">{{ edu.institution }}</div>
+                <div class="item-subtitle">{{ edu.degree }}, {{ edu.field_of_study }}</div>
+                <div class="item-date">
+                    {{ edu.start_date|date:"F Y" }} - 
+                    {% if edu.end_date %}
+                        {{ edu.end_date|date:"F Y" }}
+                    {% else %}
+                        настоящее время
+                    {% endif %}
+                </div>
+                {% if edu.description %}
+                <p class="item-description">{{ edu.description }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <!-- Навыки -->
+        {% if skills %}
+        <div class="section">
+            <h2 class="section-title">Навыки</h2>
+            <div class="skills-grid">
+                {% for skill in skills %}
+                <div class="skill-item">
+                    <div>{{ skill.name }}</div>
+                    <div class="skill-level">{{ skill.get_level_display }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Достижения -->
+        {% if achievements %}
+        <div class="section">
+            <h2 class="section-title">Достижения</h2>
+            {% for achievement in achievements %}
+            <div class="achievement-item">
+                <div class="achievement-title">
+                    {{ achievement.title }}
+                    {% if achievement.date %}
+                        ({{ achievement.date|date:"Y" }})
+                    {% endif %}
+                </div>
+                {% if achievement.description %}
+                <p class="item-description">{{ achievement.description }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <!-- Языки -->
+        {% if languages %}
+        <div class="section">
+            <h2 class="section-title">Языки</h2>
+            <div class="languages-container">
+                {% for lang in languages %}
+                <div class="language-item">
+                    {{ lang.language }} - {{ lang.get_proficiency_level_display }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
