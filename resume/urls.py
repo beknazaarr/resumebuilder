@@ -13,6 +13,10 @@ from .export_views import (
     ResumeExportPDFView,
     ResumeExportDOCXView,
 )
+from .photo_views import (
+    ResumePhotoUploadView,
+    ResumePhotoInfoView,
+)
 
 app_name = 'resume'
 
@@ -30,6 +34,10 @@ urlpatterns = [
     
     # Предпросмотр
     path('<int:pk>/preview/', ResumePreviewView.as_view(), name='preview'),
+    
+    # Работа с фотографией
+    path('<int:pk>/photo/', ResumePhotoUploadView.as_view(), name='photo_upload'),
+    path('<int:pk>/photo/info/', ResumePhotoInfoView.as_view(), name='photo_info'),
     
     # Экспорт
     path('<int:pk>/export/pdf/', ResumeExportPDFView.as_view(), name='export_pdf'),
