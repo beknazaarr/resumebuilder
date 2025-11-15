@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ personal_info.full_name|default:"Резюме" }}</title>
+    <title>{{ personal_info.full_name|default:"Предпросмотр резюме" }}</title>
     <style>
         * {
             margin: 0;
@@ -15,23 +15,57 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
             color: #333;
-            background-color: #f5f5f5;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
         }
         
         .resume-container {
             max-width: 210mm;
-            margin: 20px auto;
+            margin: 0 auto;
             background-color: white;
             padding: 40px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            border-radius: 8px;
+            animation: fadeIn 0.5s ease-in;
         }
         
-        /* Шапка резюме */
-        .resume-header {
-            text-align: center;
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Фото профиля */
+        .profile-section {
+            display: flex;
+            align-items: center;
+            gap: 30px;
             margin-bottom: 40px;
             padding-bottom: 30px;
             border-bottom: 3px solid #2c3e50;
+        }
+        
+        .profile-photo {
+            flex-shrink: 0;
+        }
+        
+        .profile-photo img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid #3498db;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        
+        .profile-info {
+            flex: 1;
         }
         
         .resume-header h1 {
@@ -47,29 +81,65 @@
             line-height: 1.8;
         }
         
+        .contact-info-item {
+            display: inline-block;
+            margin-right: 20px;
+            margin-bottom: 8px;
+        }
+        
+        .contact-info-item i {
+            color: #3498db;
+            margin-right: 5px;
+        }
+        
         .contact-info a {
             color: #3498db;
             text-decoration: none;
+            transition: color 0.3s;
         }
         
         .contact-info a:hover {
+            color: #2980b9;
             text-decoration: underline;
         }
         
         /* Секции */
         .section {
             margin-bottom: 35px;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
         
         .section-title {
             color: #2c3e50;
-            font-size: 22px;
+            font-size: 24px;
             font-weight: 700;
             margin-bottom: 20px;
             padding-bottom: 10px;
             border-bottom: 2px solid #ecf0f1;
             text-transform: uppercase;
             letter-spacing: 1px;
+            position: relative;
+        }
+        
+        .section-title::before {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, #3498db, #2980b9);
         }
         
         /* О себе */
@@ -78,13 +148,25 @@
             color: #555;
             font-size: 15px;
             line-height: 1.8;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
         }
         
         /* Элементы списка */
         .item {
             margin-bottom: 25px;
-            padding-left: 20px;
-            border-left: 3px solid #3498db;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         
         .item-title {
@@ -113,6 +195,7 @@
             font-size: 14px;
             text-align: justify;
             line-height: 1.7;
+            margin-top: 10px;
         }
         
         /* Навыки */
@@ -123,19 +206,44 @@
         }
         
         .skill-item {
-            padding: 12px 15px;
+            padding: 15px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border-radius: 8px;
             font-size: 14px;
             text-align: center;
             font-weight: 600;
+            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .skill-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .skill-name {
+            font-size: 16px;
+            margin-bottom: 5px;
         }
         
         .skill-level {
             font-size: 12px;
             opacity: 0.9;
-            margin-top: 4px;
+        }
+        
+        /* Навыки по категориям */
+        .skill-category {
+            margin-bottom: 25px;
+        }
+        
+        .skill-category-title {
+            color: #2c3e50;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            padding-left: 10px;
+            border-left: 3px solid #3498db;
         }
         
         /* Языки */
@@ -146,21 +254,34 @@
         }
         
         .language-item {
-            padding: 10px 20px;
+            padding: 12px 24px;
             background-color: #3498db;
             color: white;
             border-radius: 25px;
             font-size: 14px;
             font-weight: 600;
+            box-shadow: 0 3px 8px rgba(52, 152, 219, 0.3);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .language-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 12px rgba(52, 152, 219, 0.4);
         }
         
         /* Достижения */
         .achievement-item {
             margin-bottom: 20px;
-            padding: 15px;
-            background-color: #f8f9fa;
+            padding: 20px;
+            background-color: #e8f8f5;
             border-radius: 8px;
             border-left: 4px solid #27ae60;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .achievement-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.2);
         }
         
         .achievement-title {
@@ -175,37 +296,84 @@
             text-align: center;
             color: #95a5a6;
             font-style: italic;
-            padding: 20px;
+            padding: 40px 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 2px dashed #ddd;
+        }
+        
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+        
+        /* Печать */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .resume-container {
+                box-shadow: none;
+                border-radius: 0;
+            }
+            
+            .item:hover,
+            .skill-item:hover,
+            .language-item:hover,
+            .achievement-item:hover {
+                transform: none;
+                box-shadow: none;
+            }
         }
     </style>
 </head>
 <body>
     <div class="resume-container">
-        <!-- Шапка с личной информацией -->
+        <!-- Шапка с личной информацией и фото -->
         {% if personal_info %}
-        <div class="resume-header">
-            <h1>{{ personal_info.full_name }}</h1>
-            <div class="contact-info">
-                {% if personal_info.phone %}
-                    📞 {{ personal_info.phone }}
-                {% endif %}
-                {% if personal_info.email %}
-                    {% if personal_info.phone %} | {% endif %}
-                    📧 <a href="mailto:{{ personal_info.email }}">{{ personal_info.email }}</a>
-                {% endif %}
-                {% if personal_info.address %}
-                    <br>📍 {{ personal_info.address }}
-                {% endif %}
-                {% if personal_info.linkedin or personal_info.website %}
-                    <br>
+        <div class="profile-section">
+            {% if resume.photo %}
+            <div class="profile-photo">
+                <img src="{{ resume.photo.url }}" alt="{{ personal_info.full_name }}">
+            </div>
+            {% endif %}
+            
+            <div class="profile-info">
+                <div class="resume-header">
+                    <h1>{{ personal_info.full_name }}</h1>
+                </div>
+                <div class="contact-info">
+                    {% if personal_info.phone %}
+                        <span class="contact-info-item">
+                            <i>📞</i> {{ personal_info.phone }}
+                        </span>
+                    {% endif %}
+                    {% if personal_info.email %}
+                        <span class="contact-info-item">
+                            <i>📧</i> <a href="mailto:{{ personal_info.email }}">{{ personal_info.email }}</a>
+                        </span>
+                    {% endif %}
+                    {% if personal_info.address %}
+                        <br>
+                        <span class="contact-info-item">
+                            <i>📍</i> {{ personal_info.address }}
+                        </span>
+                    {% endif %}
                     {% if personal_info.linkedin %}
-                        🔗 <a href="{{ personal_info.linkedin }}" target="_blank">LinkedIn</a>
+                        <br>
+                        <span class="contact-info-item">
+                            <i>🔗</i> <a href="{{ personal_info.linkedin }}" target="_blank">LinkedIn</a>
+                        </span>
                     {% endif %}
                     {% if personal_info.website %}
-                        {% if personal_info.linkedin %} | {% endif %}
-                        🌐 <a href="{{ personal_info.website }}" target="_blank">Website</a>
+                        <span class="contact-info-item">
+                            <i>🌐</i> <a href="{{ personal_info.website }}" target="_blank">Website</a>
+                        </span>
                     {% endif %}
-                {% endif %}
+                </div>
             </div>
         </div>
         
@@ -217,18 +385,16 @@
         </div>
         {% endif %}
         {% else %}
-        <div class="resume-header">
-            <h1>Ваше имя</h1>
-            <div class="contact-info">
-                <p class="empty-state">Добавьте личную информацию</p>
-            </div>
+        <div class="empty-state">
+            <div class="empty-state-icon">👤</div>
+            <p>Добавьте личную информацию для отображения</p>
         </div>
         {% endif %}
         
         <!-- Опыт работы -->
         {% if work_experience %}
         <div class="section">
-            <h2 class="section-title">Опыт работы</h2>
+            <h2 class="section-title">💼 Опыт работы</h2>
             {% for work in work_experience %}
             <div class="item">
                 <div class="item-title">{{ work.position }}</div>
@@ -252,7 +418,7 @@
         <!-- Образование -->
         {% if education %}
         <div class="section">
-            <h2 class="section-title">Образование</h2>
+            <h2 class="section-title">🎓 Образование</h2>
             {% for edu in education %}
             <div class="item">
                 <div class="item-title">{{ edu.institution }}</div>
@@ -276,22 +442,29 @@
         <!-- Навыки -->
         {% if skills %}
         <div class="section">
-            <h2 class="section-title">Навыки</h2>
-            <div class="skills-grid">
-                {% for skill in skills %}
-                <div class="skill-item">
-                    <div>{{ skill.name }}</div>
-                    <div class="skill-level">{{ skill.get_level_display }}</div>
+            <h2 class="section-title">⚡ Навыки</h2>
+            
+            {% regroup skills by get_category_display as skills_by_category %}
+            {% for category in skills_by_category %}
+            <div class="skill-category">
+                <div class="skill-category-title">{{ category.grouper }}</div>
+                <div class="skills-grid">
+                    {% for skill in category.list %}
+                    <div class="skill-item">
+                        <div class="skill-name">{{ skill.name }}</div>
+                        <div class="skill-level">{{ skill.get_level_display }}</div>
+                    </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
             </div>
+            {% endfor %}
         </div>
         {% endif %}
         
         <!-- Достижения -->
         {% if achievements %}
         <div class="section">
-            <h2 class="section-title">Достижения</h2>
+            <h2 class="section-title">🏆 Достижения</h2>
             {% for achievement in achievements %}
             <div class="achievement-item">
                 <div class="achievement-title">
@@ -311,7 +484,7 @@
         <!-- Языки -->
         {% if languages %}
         <div class="section">
-            <h2 class="section-title">Языки</h2>
+            <h2 class="section-title">🌍 Языки</h2>
             <div class="languages-container">
                 {% for lang in languages %}
                 <div class="language-item">
