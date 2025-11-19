@@ -1,14 +1,12 @@
-# ResumeBuilder API - Полная документация
 
-## 🚀 Установка и запуск
 
-### 1. Установка зависимостей
+1. Установка зависимостей
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. Создание БД PostgreSQL
+2. Создание БД PostgreSQL
 
 ```sql
 CREATE DATABASE resumebuilder_db;
@@ -16,26 +14,26 @@ CREATE USER postgres WITH PASSWORD 'password';
 GRANT ALL PRIVILEGES ON DATABASE resumebuilder_db TO postgres;
 ```
 
-### 3. Миграции
+3. Миграции
 
 ```bash
 python manage.py makemigrations
 python manage.py migrate
 ```
 
-### 4. Создание суперпользователя
+4. Создание суперпользователя
 
 ```bash
 python manage.py createsuperuser
 ```
 
-### 5. Создание папок для медиа
+5. Создание папок для медиа
 
 ```bash
 mkdir -p media/resumes/photos media/templates/previews templates/resume
 ```
 
-### 6. Запуск сервера
+6. Запуск сервера
 
 ```bash
 python manage.py runserver
@@ -43,7 +41,7 @@ python manage.py runserver
 
 ---
 
-## 📚 API Документация
+API Документация
 
 ### Swagger UI
 - **URL**: `http://localhost:8000/swagger/`
@@ -51,9 +49,8 @@ python manage.py runserver
 
 ---
 
-## 🔐 Аутентификация
 
-### Регистрация
+Регистрация
 ```http
 POST /api/users/register/
 Content-Type: application/json
