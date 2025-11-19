@@ -8,3 +8,4 @@ python-docx==1.1.0
 weasyprint==60.1
 django-filter==23.5
 drf-yasg==1.21.7
+celery==5.4.7
