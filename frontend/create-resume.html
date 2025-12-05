@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Создание резюме - Resume Builder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        /* Навигация */
+        .navbar {
+            background: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #000;
+            text-decoration: none;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.7rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #000;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #333;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #666;
+            border: 2px solid #ddd;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        /* Контейнер */
+        .container {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            min-height: calc(100vh - 80px);
+        }
+
+        /* Боковая панель */
+        .sidebar {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
+        }
+
+        .sidebar h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Табы */
+        .tabs {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .tab {
+            padding: 1rem;
+            background: #f5f5f5;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .tab:hover {
+            background: #e8e8e8;
+        }
+
+        .tab.active {
+            background: #000;
+            color: white;
+        }
+
+        .tab-icon {
+            font-size: 1.2rem;
+        }
+
+        /* Формы */
+        .form-section {
+            display: none;
+        }
+
+        .form-section.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #000;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+        }
+
+        /* Список элементов */
+        .items-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .item-card {
+            background: #f5f5f5;
+            padding: 1rem;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+        }
+
+        .item-content h4 {
+            margin-bottom: 0.3rem;
+        }
+
+        .item-content p {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+        }
+
+        /* Предпросмотр */
+        .preview-container {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            min-height: 600px;
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .preview-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .preview-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        #previewContent {
+            background: #fff;
+            padding: 2rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            min-height: 500px;
+        }
+
+        /* Загрузка фото */
+        .photo-upload {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .photo-preview {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+            overflow: hidden;
+        }
+
+        .photo-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        /* Loader */
+        .loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .loader-overlay.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #000;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Адаптивность */
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: static;
+                max-height: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Навигация -->
+    <nav class="navbar">
+        <a href="dashboard.html" class="logo">Resume Builder</a>
+        <div class="nav-actions">
+            <button class="btn btn-outline" onclick="saveResume()">💾 Сохранить</button>
+            <button class="btn btn-success" onclick="exportPDF()">📥 Экспорт PDF</button>
+            <a href="dashboard.html" class="btn btn-outline">← Назад</a>
+        </div>
+    </nav>
+
+    <!-- Контейнер -->
+    <div class="container">
+        <!-- Боковая панель -->
+        <div class="sidebar">
+            <h2 id="resumeTitle">Новое резюме</h2>
+
+            <!-- Табы -->
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('basic')">
+                    <span class="tab-icon">📝</span>
+                    <span>Основное</span>
+                </div>
+                <div class="tab" onclick="switchTab('personal')">
+                    <span class="tab-icon">👤</span>
+                    <span>Личная информация</span>
+                </div>
+                <div class="tab" onclick="switchTab('education')">
+                    <span class="tab-icon">🎓</span>
+                    <span>Образование</span>
+                </div>
+                <div class="tab" onclick="switchTab('experience')">
+                    <span class="tab-icon">💼</span>
+                    <span>Опыт работы</span>
+                </div>
+                <div class="tab" onclick="switchTab('skills')">
+                    <span class="tab-icon">⚡</span>
+                    <span>Навыки</span>
+                </div>
+                <div class="tab" onclick="switchTab('languages')">
+                    <span class="tab-icon">🌍</span>
+                    <span>Языки</span>
+                </div>
+                <div class="tab" onclick="switchTab('achievements')">
+                    <span class="tab-icon">🏆</span>
+                    <span>Достижения</span>
+                </div>
+            </div>
+
+            <!-- Основное -->
+            <div id="basic" class="form-section active">
+                <h3>Основная информация</h3>
+                <div class="form-group">
+                    <label>Название резюме</label>
+                    <input type="text" id="title" placeholder="Например: Резюме Frontend Developer" value="Мое резюме">
+                </div>
+                <div class="form-group">
+                    <label>Шаблон</label>
+                    <select id="template">
+                        <option value="">Выберите шаблон...</option>
+                    </select>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="isPrimary">
+                    <label for="isPrimary">Сделать основным резюме</label>
+                </div>
+            </div>
+
+            <!-- Личная информация -->
+            <div id="personal" class="form-section">
+                <h3>Личная информация</h3>
+                
+                <div class="photo-upload">
+                    <div class="photo-preview" id="photoPreview">👤</div>
+                    <div class="photo-actions">
+                        <button class="btn btn-outline btn-sm" onclick="document.getElementById('photoInput').click()">
+                            Загрузить фото
+                        </button>
+                        <button class="btn btn-outline btn-sm" onclick="removePhoto()">Удалить</button>
+                    </div>
+                </div>
+                <input type="file" id="photoInput" class="file-input" accept="image/*" onchange="uploadPhoto(this)">
+
+                <div class="form-group">
+                    <label>ФИО *</label>
+                    <input type="text" id="fullName" placeholder="Иван Иванов" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Телефон</label>
+                        <input type="tel" id="phone" placeholder="+996 555 123 456">
+                    </div>
+                    <div class="form-group">
+                        <label>Email *</label>
+                        <input type="email" id="email" placeholder="ivan@example.com" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Адрес</label>
+                    <input type="text" id="address" placeholder="Бишкек, Кыргызстан">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>LinkedIn</label>
+                        <input type="url" id="linkedin" placeholder="https://linkedin.com/in/username">
+                    </div>
+                    <div class="form-group">
+                        <label>Веб-сайт</label>
+                        <input type="url" id="website" placeholder="https://yoursite.com">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>О себе</label>
+                    <textarea id="summary" placeholder="Расскажите о себе..."></textarea>
+                </div>
+                <button class="btn btn-primary" onclick="savePersonalInfo()">Сохранить</button>
+            </div>
+
+            <!-- Образование -->
+            <div id="education" class="form-section">
+                <h3>Образование</h3>
+                <div id="educationList" class="items-list"></div>
+                <button class="btn btn-primary" onclick="addEducation()">+ Добавить образование</button>
+            </div>
+
+            <!-- Опыт работы -->
+            <div id="experience" class="form-section">
+                <h3>Опыт работы</h3>
+                <div id="experienceList" class="items-list"></div>
+                <button class="btn btn-primary" onclick="addExperience()">+ Добавить опыт</button>
+            </div>
+
+            <!-- Навыки -->
+            <div id="skills" class="form-section">
+                <h3>Навыки</h3>
+                <div id="skillsList" class="items-list"></div>
+                <button class="btn btn-primary" onclick="addSkill()">+ Добавить навык</button>
+            </div>
+
+            <!-- Языки -->
+            <div id="languages" class="form-section">
+                <h3>Языки</h3>
+                <div id="languagesList" class="items-list"></div>
+                <button class="btn btn-primary" onclick="addLanguage()">+ Добавить язык</button>
+            </div>
+
+            <!-- Достижения -->
+            <div id="achievements" class="form-section">
+                <h3>Достижения</h3>
+                <div id="achievementsList" class="items-list"></div>
+                <button class="btn btn-primary" onclick="addAchievement()">+ Добавить достижение</button>
+            </div>
+        </div>
+
+        <!-- Предпросмотр -->
+        <div class="preview-container">
+            <div class="preview-header">
+                <h2>Предпросмотр</h2>
+                <div class="preview-actions">
+                    <button class="btn btn-outline" onclick="refreshPreview()">🔄 Обновить</button>
+                </div>
+            </div>
+            <div id="previewContent">
+                <p style="text-align: center; color: #999; padding: 4rem;">
+                    Заполните информацию, чтобы увидеть предпросмотр резюме
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loader -->
+    <div class="loader-overlay" id="loader">
+        <div class="spinner"></div>
+    </div>
+
+    <script>
+        let currentResumeId = null;
+        let currentTemplate = null;
+        const API_URL = 'http://localhost:8000/api';
+
+        // Проверка авторизации
+        function checkAuth() {
+            const token = localStorage.getItem('access_token');
+            if (!token) {
+                window.location.href = 'index.html';
+                return false;
+            }
+            return true;
+        }
+
+        // Получение токена
+        function getToken() {
+            return localStorage.getItem('access_token');
+        }
+
+        // Переключение табов
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.form-section').forEach(section => section.classList.remove('active'));
+            
+            event.target.closest('.tab').classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        // Загрузка шаблонов
+        async function loadTemplates() {
+            try {
+                const response = await fetch(`${API_URL}/templates/`);
+                if (response.ok) {
+                    const templates = await response.json();
+                    const select = document.getElementById('template');
+                    templates.forEach(t => {
+                        const option = document.createElement('option');
+                        option.value = t.id;
+                        option.textContent = t.name;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки шаблонов:', error);
+            }
+        }
+
+        // Загрузка резюме
+        async function loadResume() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const resumeId = urlParams.get('id');
+            const templateId = urlParams.get('template');
+
+            if (templateId) {
+                document.getElementById('template').value = templateId;
+            }
+
+            if (resumeId) {
+                currentResumeId = resumeId;
+                showLoader();
+                
+                try {
+                    const response = await fetch(`${API_URL}/resumes/${resumeId}/`, {
+                        headers: { 'Authorization': `Bearer ${getToken()}` }
+                    });
+
+                    if (response.ok) {
+                        const resume = await response.json();
+                        populateForm(resume);
+                        refreshPreview();
+                    }
+                } catch (error) {
+                    console.error('Ошибка загрузки резюме:', error);
+                } finally {
+                    hideLoader();
+                }
+            }
+        }
+
+        // Заполнение формы
+        function populateForm(resume) {
+            document.getElementById('resumeTitle').textContent = resume.title;
+            document.getElementById('title').value = resume.title;
+            document.getElementById('template').value = resume.template || '';
+            document.getElementById('isPrimary').checked = resume.is_primary;
+
+            if (resume.personal_info) {
+                const pi = resume.personal_info;
+                document.getElementById('fullName').value = pi.full_name || '';
+                document.getElementById('phone').value = pi.phone || '';
+                document.getElementById('email').value = pi.email || '';
+                document.getElementById('address').value = pi.address || '';
+                document.getElementById('linkedin').value = pi.linkedin || '';
+                document.getElementById('website').value = pi.website || '';
+                document.getElementById('summary').value = pi.summary || '';
+            }
+
+            if (resume.photo) {
+                document.getElementById('photoPreview').innerHTML = `<img src="${API_URL.replace('/api', '')}${resume.photo}" alt="Photo">`;
+            }
+        }
+
+        // Сохранение резюме
+        async function saveResume() {
+            const title = document.getElementById('title').value;
+            const template = document.getElementById('template').value;
+            const isPrimary = document.getElementById('isPrimary').checked;
+
+            if (!title) {
+                alert('Укажите название резюме');
+                return;
+            }
+
+            showLoader();
+
+            try {
+                const url = currentResumeId 
+                    ? `${API_URL}/resumes/${currentResumeId}/update/`
+                    : `${API_URL}/resumes/create/`;
+                
+                const method = currentResumeId ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method,
+                    headers: {
+                        'Authorization': `Bearer ${getToken()}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ title, template: template || null, is_primary: isPrimary })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    currentResumeId = data.resume.id;
+                    alert(data.message);
+                    window.history.replaceState(null, '', `create-resume.html?id=${currentResumeId}`);
+                } else {
+                    const error = await response.json();
+                    alert('Ошибка: ' + JSON.stringify(error));
+                }
+            } catch (error) {
+                alert('Ошибка сохранения');
+                console.error(error);
+            } finally {
+                hideLoader();
+            }
+        }
+
+        // Сохранение личной информации
+        async function savePersonalInfo() {
+            if (!currentResumeId) {
+                alert('Сначала создайте резюме');
+                return;
+            }
+
+            const data = {
+                full_name: document.getElementById('fullName').value,
+                phone: document.getElementById('phone').value,
+                email: document.getElementById('email').value,
+                address: document.getElementById('address').value,
+                linkedin: document.getElementById('linkedin').value,
+                website: document.getElementById('website').value,
+                summary: document.getElementById('summary').value
+            };
+
+            showLoader();
+
+            try {
+                const response = await fetch(`${API_URL}/resume/${currentResumeId}/personal-info/`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${getToken()}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    alert('Личная информация сохранена');
+                    refreshPreview();
+                } else {
+                    const error = await response.json();
+                    alert('Ошибка: ' + JSON.stringify(error));
+                }
+            } catch (error) {
+                alert('Ошибка сохранения');
+                console.error(error);
+            } finally {
+                hideLoader();
+            }
+        }
+
+        // Загрузка фото
+        async function uploadPhoto(input) {
+            if (!currentResumeId) {
+                alert('Сначала создайте резюме');
+                return;
+            }
+
+            const file = input.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('photo', file);
+
+            showLoader();
+
+            try {
+                const response = await fetch(`${API_URL}/resumes/${currentResumeId}/photo/`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${getToken()}` },
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('photoPreview').innerHTML = `<img src="${data.photo_url}" alt="Photo">`;
+                    alert('Фото загружено');
+                } else {
+                    const error = await response.json();
+                    alert('Ошибка: ' + error.error);
+                }
+            } catch (error) {
+                alert('Ошибка загрузки фото');
+                console.error(error);
+            } finally {
+                hideLoader();
+            }
+        }
+
+        // Удаление фото
+        async function removePhoto() {
+            if (!currentResumeId) return;
+
+            showLoader();
+
+            try {
+                const response = await fetch(`${API_URL}/resumes/${currentResumeId}/photo/`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+
+                if (response.ok) {
+                    document.getElementById('photoPreview').innerHTML = '👤';
+                    alert('Фото удалено');
+                }
+            } catch (error) {
+                console.error('Ошибка удаления фото:', error);
+            } finally {
+                hideLoader();
+            }
+        }
+
+        // Предпросмотр
+        async function refreshPreview() {
+            if (!currentResumeId) return;
+
+            showLoader();
+
+            try {
+                const response = await fetch(`${API_URL}/resumes/${currentResumeId}/preview/`, {
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('previewContent').innerHTML = data.html;
+                }
+            } catch (error) {
+                console.error('Ошибка предпросмотра:', error);
+            } finally {
+                hideLoader();
+            }
+        }
+
+        // Экспорт в PDF
+        async function exportPDF() {
+            if (!currentResumeId) {
+                alert('Сначала создайте резюме');
+                return;
+            }
+
+            window.open(`${API_URL}/resumes/${currentResumeId}/export/pdf/`, '_blank');
+        }
+
+        // Заглушки для других функций
+        function addEducation() { alert('Функция добавления образования - реализуйте аналогично personalInfo'); }
+        function addExperience() { alert('Функция добавления опыта - реализуйте аналогично personalInfo'); }
+        function addSkill() { alert('Функция добавления навыка - реализуйте аналогично personalInfo'); }
+        function addLanguage() { alert('Функция добавления языка - реализуйте аналогично personalInfo'); }
+        function addAchievement() { alert('Функция добавления достижения - реализуйте аналогично personalInfo'); }
+
+        // Loader
+        function showLoader() {
+            document.getElementById('loader').classList.add('active');
+        }
+
+        function hideLoader() {
+            document.getElementById('loader').classList.remove('active');
+        }
+
+        // Инициализация
+        if (checkAuth()) {
+            loadTemplates();
+            loadResume();
+        }
+    </script>
+</body>
+</html>
