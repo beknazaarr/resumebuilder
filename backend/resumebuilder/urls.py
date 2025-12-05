@@ -1,12 +1,11 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from django.views.generic import TemplateView
-from django.urls import path, include, re_path
 from rest_framework.routers import DefaultRouter
 from resume.common_views import (
     EducationViewSet,
@@ -34,18 +33,18 @@ schema_view = get_schema_view(
 router = DefaultRouter()
 
 urlpatterns = [
+    # Admin
     path("admin/", admin.site.urls),
     
     # Swagger документация
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     
-    # API endpoints
+    # API endpoints - ВАЖНО: все API роуты должны быть ПЕРЕД фронтенд паттерном
     path('api/users/', include('user.urls')),
     path('api/templates/', include('template.urls')),
     path('api/resumes/', include('resume.urls')),
     path('api/', include('personalinfo.urls')),
-    re_path(r'^.*$', TemplateView.as_view(template_name='index.html'), name='frontend'),
 ]
 
 # Динамически добавляем роуты для каждого ViewSet с resume_id
@@ -99,7 +98,15 @@ urlpatterns += [
          name='language-detail'),
 ]
 
-# Media files
+# Media files (для разработки)
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+# ВАЖНО: Frontend маршрут должен быть ПОСЛЕДНИМ
+# Он перехватывает все остальные запросы и отдаёт index.html
+urlpatterns += [
+    re_path(r'^(?!api|admin|swagger|redoc|media|static).*$', 
+            TemplateView.as_view(template_name='index.html'), 
+            name='frontend'),
+]
