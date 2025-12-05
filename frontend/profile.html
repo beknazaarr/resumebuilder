@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль - Resume Builder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        /* Навигация */
+        .navbar {
+            background: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #000;
+            text-decoration: none;
+        }
+
+        .btn {
+            padding: 0.7rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #000;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #333;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #666;
+            border: 2px solid #ddd;
+        }
+
+        .btn-outline:hover {
+            border-color: #000;
+            color: #000;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        /* Контейнер */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Хедер профиля */
+        .profile-header {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+            font-weight: 700;
+        }
+
+        .profile-info h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-info p {
+            color: #666;
+            margin-bottom: 0.3rem;
+        }
+
+        .profile-stats {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        /* Карточки секций */
+        .section-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header h2 {
+            font-size: 1.3rem;
+        }
+
+        /* Формы */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #000;
+        }
+
+        .form-group input:disabled {
+            background: #f5f5f5;
+            cursor: not-allowed;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        /* Информационные блоки */
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .info-value {
+            color: #000;
+        }
+
+        /* Алерты */
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Модальное окно */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+        }
+
+        /* Loader */
+        .loader {
+            display: none;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .loader.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #000;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .profile-stats {
+                justify-content: center;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Навигация -->
+    <nav class="navbar">
+        <a href="dashboard.html" class="logo">Resume Builder</a>
+        <div>
+            <a href="dashboard.html" class="btn btn-outline">← Назад к резюме</a>
+        </div>
+    </nav>
+
+    <!-- Контейнер -->
+    <div class="container">
+        <!-- Хедер профиля -->
+        <div class="profile-header">
+            <div class="profile-avatar" id="profileAvatar">U</div>
+            <div class="profile-info">
+                <h1 id="profileName">Пользователь</h1>
+                <p id="profileEmail">email@example.com</p>
+                <p id="profileDate">Зарегистрирован: ...</p>
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <span class="stat-value" id="resumeCount">0</span>
+                        <span class="stat-label">Резюме</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="memberDays">0</span>
+                        <span class="stat-label">Дней с нами</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loader -->
+        <div class="loader" id="loader">
+            <div class="spinner"></div>
+        </div>
+
+        <!-- Алерты -->
+        <div id="alertContainer"></div>
+
+        <!-- Редактирование профиля -->
+        <div class="section-card">
+            <div class="section-header">
+                <h2>Личная информация</h2>
+                <button class="btn btn-outline" id="editBtn" onclick="toggleEdit()">✏️ Редактировать</button>
+            </div>
+
+            <form id="profileForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Имя пользователя</label>
+                        <input type="text" id="username" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="email" disabled>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Имя</label>
+                        <input type="text" id="firstName" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label>Фамилия</label>
+                        <input type="text" id="lastName" disabled>
+                    </div>
+                </div>
+
+                <div class="form-actions" id="formActions" style="display: none;">
+                    <button type="button" class="btn btn-outline" onclick="cancelEdit()">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Смена пароля -->
+        <div class="section-card">
+            <div class="section-header">
+                <h2>Безопасность</h2>
+            </div>
+
+            <button class="btn btn-outline" onclick="openPasswordModal()">🔒 Изменить пароль</button>
+        </div>
+
+        <!-- Статистика -->
+        <div class="section-card">
+            <div class="section-header">
+                <h2>Информация об аккаунте</h2>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">ID пользователя</span>
+                <span class="info-value" id="userId">—</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Дата регистрации</span>
+                <span class="info-value" id="createdAt">—</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Последнее обновление</span>
+                <span class="info-value" id="updatedAt">—</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Статус аккаунта</span>
+                <span class="info-value">✅ Активен</span>
+            </div>
+        </div>
+
+        <!-- Опасная зона -->
+        <div class="section-card" style="border: 2px solid #e74c3c;">
+            <div class="section-header">
+                <h2 style="color: #e74c3c;">Опасная зона</h2>
+            </div>
+            <p style="color: #666; margin-bottom: 1rem;">
+                Удаление аккаунта приведет к безвозвратному удалению всех ваших данных и резюме.
+            </p>
+            <button class="btn btn-danger" onclick="alert('Функция удаления аккаунта временно недоступна')">
+                Удалить аккаунт
+            </button>
+        </div>
+    </div>
+
+    <!-- Модальное окно смены пароля -->
+    <div class="modal" id="passwordModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Изменить пароль</h3>
+                <button class="modal-close" onclick="closePasswordModal()">×</button>
+            </div>
+
+            <form id="passwordForm">
+                <div class="form-group">
+                    <label>Текущий пароль</label>
+                    <input type="password" id="oldPassword" required>
+                </div>
+                <div class="form-group">
+                    <label>Новый пароль</label>
+                    <input type="password" id="newPassword" required>
+                </div>
+                <div class="form-group">
+                    <label>Подтвердите новый пароль</label>
+                    <input type="password" id="newPassword2" required>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" onclick="closePasswordModal()">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Изменить пароль</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api';
+        let isEditing = false;
+        let originalData = {};
+
+        // Проверка авторизации
+        function checkAuth() {
+            const token = localStorage.getItem('access_token');
+            if (!token) {
+                window.location.href = 'index.html';
+                return false;
+            }
+            return true;
+        }
+
+        // Получение токена
+        function getToken() {
+            return localStorage.getItem('access_token');
+        }
+
+        // Показать алерт
+        function showAlert(message, type = 'success') {
+            const container = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            container.appendChild(alert);
+
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+        }
+
+        // Загрузка профиля
+        async function loadProfile() {
+            const loader = document.getElementById('loader');
+            loader.classList.add('active');
+
+            try {
+                const response = await fetch(`${API_URL}/users/profile/`, {
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+
+                if (response.ok) {
+                    const user = await response.json();
+                    displayProfile(user);
+                    await loadResumeStats();
+                } else {
+                    throw new Error('Ошибка загрузки профиля');
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showAlert('Не удалось загрузить профиль', 'error');
+            } finally {
+                loader.classList.remove('active');
+            }
+        }
+
+        // Отображение профиля
+        function displayProfile(user) {
+            originalData = { ...user };
+
+            // Хедер
+            document.getElementById('profileAvatar').textContent = user.username.charAt(0).toUpperCase();
+            document.getElementById('profileName').textContent = 
+                user.first_name && user.last_name 
+                    ? `${user.first_name} ${user.last_name}` 
+                    : user.username;
+            document.getElementById('profileEmail').textContent = user.email;
+
+            // Форма
+            document.getElementById('username').value = user.username;
+            document.getElementById('email').value = user.email;
+            document.getElementById('firstName').value = user.first_name || '';
+            document.getElementById('lastName').value = user.last_name || '';
+
+            // Информация
+            document.getElementById('userId').textContent = user.id;
+            document.getElementById('createdAt').textContent = new Date(user.created_at).toLocaleString('ru-RU');
+            
+            // Дата регистрации
+            const createdDate = new Date(user.created_at);
+            const memberDays = Math.floor((Date.now() - createdDate) / (1000 * 60 * 60 * 24));
+            document.getElementById('profileDate').textContent = 
+                `Зарегистрирован: ${createdDate.toLocaleDateString('ru-RU')}`;
+            document.getElementById('memberDays').textContent = memberDays;
+        }
+
+        // Загрузка статистики резюме
+        async function loadResumeStats() {
+            try {
+                const response = await fetch(`${API_URL}/resumes/`, {
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const resumes = data.results || data;
+                    document.getElementById('resumeCount').textContent = resumes.length;
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки статистики:', error);
+            }
+        }
+
+        // Переключение режима редактирования
+        function toggleEdit() {
+            isEditing = !isEditing;
+
+            const inputs = ['username', 'email', 'firstName', 'lastName'];
+            inputs.forEach(id => {
+                document.getElementById(id).disabled = !isEditing;
+            });
+
+            document.getElementById('formActions').style.display = isEditing ? 'flex' : 'none';
+            document.getElementById('editBtn').textContent = isEditing ? '❌ Отменить' : '✏️ Редактировать';
+            document.getElementById('editBtn').onclick = isEditing ? cancelEdit : toggleEdit;
+        }
+
+        // Отмена редактирования
+        function cancelEdit() {
+            isEditing = false;
+            displayProfile(originalData);
+            document.getElementById('formActions').style.display = 'none';
+            document.getElementById('editBtn').textContent = '✏️ Редактировать';
+            document.getElementById('editBtn').onclick = toggleEdit;
+
+            const inputs = ['username', 'email', 'firstName', 'lastName'];
+            inputs.forEach(id => {
+                document.getElementById(id).disabled = true;
+            });
+        }
+
+        // Сохранение профиля
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const data = {
+                username: document.getElementById('username').value,
+                email: document.getElementById('email').value,
+                first_name: document.getElementById('firstName').value,
+                last_name: document.getElementById('lastName').value
+            };
+
+            const loader = document.getElementById('loader');
+            loader.classList.add('active');
+
+            try {
+                const response = await fetch(`${API_URL}/users/profile/`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${getToken()}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    showAlert(result.message || 'Профиль успешно обновлен');
+                    cancelEdit();
+                    await loadProfile();
+                } else {
+                    const error = await response.json();
+                    showAlert(JSON.stringify(error), 'error');
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showAlert('Не удалось сохранить профиль', 'error');
+            } finally {
+                loader.classList.remove('active');
+            }
+        });
+
+        // Модальное окно пароля
+        function openPasswordModal() {
+            document.getElementById('passwordModal').classList.add('active');
+        }
+
+        function closePasswordModal() {
+            document.getElementById('passwordModal').classList.remove('active');
+            document.getElementById('passwordForm').reset();
+        }
+
+        // Смена пароля
+        document.getElementById('passwordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const data = {
+                old_password: document.getElementById('oldPassword').value,
+                new_password: document.getElementById('newPassword').value,
+                new_password2: document.getElementById('newPassword2').value
+            };
+
+            if (data.new_password !== data.new_password2) {
+                showAlert('Новые пароли не совпадают', 'error');
+                return;
+            }
+
+            const loader = document.getElementById('loader');
+            loader.classList.add('active');
+
+            try {
+                const response = await fetch(`${API_URL}/users/change-password/`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${getToken()}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    showAlert(result.message || 'Пароль успешно изменен');
+                    closePasswordModal();
+                } else {
+                    const error = await response.json();
+                    showAlert(error.error || 'Ошибка смены пароля', 'error');
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showAlert('Не удалось изменить пароль', 'error');
+            } finally {
+                loader.classList.remove('active');
+            }
+        });
+
+        // Закрытие модального окна при клике вне его
+        document.getElementById('passwordModal').addEventListener('click', (e) => {
+            if (e.target.id === 'passwordModal') {
+                closePasswordModal();
+            }
+        });
+
+        // Инициализация
+        if (checkAuth()) {
+            loadProfile();
+        }
+    </script>
+</body>
+</html>
