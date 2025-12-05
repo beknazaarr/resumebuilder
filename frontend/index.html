@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Builder - Создайте резюме</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f8f9fa;
+            color: #333;
+        }
+
+        /* Навигация */
+        .navbar {
+            background: white;
+            padding: 1.2rem 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #000;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: #333;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-link:hover {
+            color: #666;
+        }
+
+        .btn {
+            padding: 0.7rem 1.8rem;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #000;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #333;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #000;
+            border: 2px solid #000;
+        }
+
+        .btn-outline:hover {
+            background: #000;
+            color: white;
+        }
+
+        /* Героическая секция */
+        .hero {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+            min-height: calc(100vh - 80px);
+        }
+
+        .hero-content h1 {
+            font-size: 3rem;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+            color: #000;
+        }
+
+        .hero-content p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #666;
+            margin-bottom: 2rem;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        /* Иллюстрация */
+        .hero-illustration {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+            border-radius: 20px;
+            padding: 3rem;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+        }
+
+        .resume-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            width: 280px;
+            position: relative;
+            transform: rotate(-5deg);
+            transition: transform 0.3s;
+        }
+
+        .resume-card:hover {
+            transform: rotate(0deg) scale(1.05);
+        }
+
+        .resume-header {
+            width: 60px;
+            height: 60px;
+            background: #000;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+
+        .resume-line {
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+        }
+
+        .resume-line.long {
+            width: 100%;
+        }
+
+        .resume-line.medium {
+            width: 70%;
+        }
+
+        .resume-line.short {
+            width: 50%;
+        }
+
+        .pencil {
+            position: absolute;
+            bottom: -20px;
+            right: -20px;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #fdcb6e 0%, #e17055 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            animation: bounce 2s infinite;
+        }
+
+        .pencil::before {
+            content: '✏️';
+            font-size: 2rem;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .secondary-card {
+            background: #74b9ff;
+            padding: 1.5rem;
+            border-radius: 12px;
+            position: absolute;
+            top: 20px;
+            left: -40px;
+            width: 180px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: rotate(8deg);
+        }
+
+        .secondary-card-line {
+            height: 6px;
+            background: rgba(255,255,255,0.7);
+            border-radius: 3px;
+            margin-bottom: 0.4rem;
+        }
+
+        /* Футер */
+        .footer {
+            background: white;
+            padding: 3rem 2rem 1.5rem;
+            margin-top: 4rem;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section a {
+            color: #666;
+            text-decoration: none;
+            line-height: 2;
+            transition: color 0.3s;
+        }
+
+        .footer-section a:hover {
+            color: #000;
+        }
+
+        .footer-bottom {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-top: 2rem;
+            border-top: 1px solid #e0e0e0;
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            background: #f0f0f0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .social-icon:hover {
+            background: #000;
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .hero {
+                grid-template-columns: 1fr;
+                padding: 2rem 1rem;
+            }
+
+            .hero-content h1 {
+                font-size: 2rem;
+            }
+
+            .nav-menu {
+                gap: 1rem;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+            }
+
+            .secondary-card {
+                display: none;
+            }
+        }
+
+        /* Модальные окна */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 3rem;
+            border-radius: 12px;
+            max-width: 450px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: #999;
+        }
+
+        .modal-close:hover {
+            color: #333;
+        }
+
+        .modal h2 {
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #000;
+        }
+
+        .form-link {
+            text-align: center;
+            margin-top: 1rem;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .form-link a {
+            color: #000;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .form-link a:hover {
+            text-decoration: underline;
+        }
+
+        .btn-full {
+            width: 100%;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Навигация -->
+    <nav class="navbar">
+        <div class="logo">Resume Builder</div>
+        <div class="nav-menu">
+            <a href="#" class="nav-link">Шаблоны</a>
+            <a href="#" class="nav-link">Контакты</a>
+            <button class="btn btn-outline" onclick="openModal('loginModal')">Авторизация</button>
+            <button class="btn btn-primary" onclick="openModal('registerModal')">Регистрация</button>
+        </div>
+    </nav>
+
+    <!-- Главная секция -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Создайте резюме вместе с Resume Builder и воплощайте свои мечты</h1>
+            <p>Создайте резюме всего с Resume Builder и воплощайте свои мечты</p>
+            <div class="hero-buttons">
+                <button class="btn btn-primary" onclick="openModal('registerModal')">Создать</button>
+            </div>
+        </div>
+
+        <div class="hero-illustration">
+            <div class="secondary-card">
+                <div class="secondary-card-line" style="width: 80%"></div>
+                <div class="secondary-card-line" style="width: 60%"></div>
+                <div class="secondary-card-line" style="width: 90%"></div>
+            </div>
+            
+            <div class="resume-card">
+                <div class="resume-header"></div>
+                <div class="resume-line long"></div>
+                <div class="resume-line long"></div>
+                <div class="resume-line medium"></div>
+                <div class="resume-line long"></div>
+                <div class="resume-line short"></div>
+                <div class="resume-line long"></div>
+                <div class="resume-line medium"></div>
+                
+                <div class="pencil"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Футер -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Resume Builder</h3>
+                <div class="social-icons">
+                    <div class="social-icon">f</div>
+                    <div class="social-icon">in</div>
+                    <div class="social-icon">@</div>
+                    <div class="social-icon">ig</div>
+                </div>
+            </div>
+
+            <div class="footer-section">
+                <h3>Topic</h3>
+                <ul>
+                    <li><a href="#">Page</a></li>
+                    <li><a href="#">Page</a></li>
+                    <li><a href="#">Page</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h3>Topic</h3>
+                <ul>
+                    <li><a href="#">Page</a></li>
+                    <li><a href="#">Page</a></li>
+                    <li><a href="#">Page</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h3>Topic</h3>
+                <ul>
+                    <li><a href="#">Page</a></li>
+                    <li><a href="#">Page</a></li>
+                    <li><a href="#">Page</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            Resume Builder © 2024. Все права защищены.
+        </div>
+    </footer>
+
+    <!-- Модальное окно регистрации -->
+    <div class="modal" id="registerModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('registerModal')">×</button>
+            <h2>Регистрация</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label>Логин</label>
+                    <input type="text" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label>Адрес электронной почты</label>
+                    <input type="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Пароль</label>
+                    <input type="password" name="password" required>
+                </div>
+                <div class="form-group">
+                    <label>Подтвердите пароль</label>
+                    <input type="password" name="password2" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">Подтвердить</button>
+            </form>
+            <div class="form-link">
+                Уже есть аккаунт? <a href="#" onclick="switchModal('registerModal', 'loginModal')">Войти</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно входа -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('loginModal')">×</button>
+            <h2>Войти</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Логин</label>
+                    <input type="text" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label>Пароль</label>
+                    <input type="password" name="password" required>
+                </div>
+                <div class="form-link" style="text-align: right; margin-top: 0;">
+                    <a href="#">Забыли пароль?</a>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">Войти</button>
+            </form>
+            <div class="form-link">
+                Нет аккаунта? <a href="#" onclick="switchModal('loginModal', 'registerModal')">Зарегистрироваться</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Управление модальными окнами
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        function switchModal(closeId, openId) {
+            closeModal(closeId);
+            setTimeout(() => openModal(openId), 200);
+        }
+
+        // Закрытие при клике вне модального окна
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeModal(modal.id);
+                }
+            });
+        });
+
+        // Обработка формы регистрации
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+
+            try {
+                const response = await fetch('http://localhost:8000/api/users/register/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert('Регистрация успешна! ' + result.message);
+                    localStorage.setItem('access_token', result.access);
+                    localStorage.setItem('refresh_token', result.refresh);
+                    closeModal('registerModal');
+                    // Перенаправление на страницу создания резюме
+                    // window.location.href = '/dashboard';
+                } else {
+                    alert('Ошибка: ' + JSON.stringify(result));
+                }
+            } catch (error) {
+                alert('Ошибка подключения к серверу');
+                console.error(error);
+            }
+        });
+
+        // Обработка формы входа
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+
+            try {
+                const response = await fetch('http://localhost:8000/api/users/login/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert('Вход выполнен! ' + result.message);
+                    localStorage.setItem('access_token', result.access);
+                    localStorage.setItem('refresh_token', result.refresh);
+                    closeModal('loginModal');
+                    // Перенаправление на страницу создания резюме
+                    // window.location.href = '/dashboard';
+                } else {
+                    alert('Ошибка: ' + result.error);
+                }
+            } catch (error) {
+                alert('Ошибка подключения к серверу');
+                console.error(error);
+            }
+        });
+
+        // Закрытие по ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal.active').forEach(modal => {
+                    closeModal(modal.id);
+                });
+            }
+        });
+    </script>
+</body>
+</html>

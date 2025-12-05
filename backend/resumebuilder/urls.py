@@ -5,6 +5,8 @@ from django.conf.urls.static import static
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+from django.views.generic import TemplateView
+from django.urls import path, include, re_path
 from rest_framework.routers import DefaultRouter
 from resume.common_views import (
     EducationViewSet,
@@ -43,6 +45,7 @@ urlpatterns = [
     path('api/templates/', include('template.urls')),
     path('api/resumes/', include('resume.urls')),
     path('api/', include('personalinfo.urls')),
+    re_path(r'^.*$', TemplateView.as_view(template_name='index.html'), name='frontend'),
 ]
 
 # Динамически добавляем роуты для каждого ViewSet с resume_id
