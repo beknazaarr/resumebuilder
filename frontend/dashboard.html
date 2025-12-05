@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет - Resume Builder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        /* Навигация */
+        .navbar {
+            background: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #000;
+            text-decoration: none;
+        }
+
+        .nav-right {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+
+        .user-info:hover {
+            background: #f5f5f5;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .user-name {
+            font-weight: 500;
+        }
+
+        .btn {
+            padding: 0.7rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #000;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #333;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #666;
+            border: 2px solid #ddd;
+        }
+
+        .btn-outline:hover {
+            border-color: #000;
+            color: #000;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        /* Контейнер */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Хедер страницы */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            color: #000;
+        }
+
+        /* Статистика */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon.purple {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .stat-icon.blue {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .stat-icon.green {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #000;
+            margin-bottom: 0.3rem;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        /* Резюме */
+        .resumes-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: #000;
+        }
+
+        .resumes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .resume-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .resume-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .resume-preview {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .resume-preview-icon {
+            font-size: 3rem;
+        }
+
+        .resume-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .resume-badge.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .resume-content {
+            padding: 1.5rem;
+        }
+
+        .resume-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #000;
+        }
+
+        .resume-meta {
+            display: flex;
+            gap: 1rem;
+            color: #666;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+        }
+
+        .resume-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s;
+        }
+
+        .progress-label {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        .resume-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            flex: 1;
+        }
+
+        .btn-icon {
+            padding: 0.5rem;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #000;
+        }
+
+        .empty-state p {
+            color: #666;
+            margin-bottom: 2rem;
+        }
+
+        /* Модальное окно */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h3 {
+            font-size: 1.3rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .modal-close:hover {
+            color: #333;
+        }
+
+        .modal-body p {
+            margin-bottom: 1.5rem;
+            color: #666;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        /* Dropdown меню */
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            margin-top: 0.5rem;
+            min-width: 200px;
+            overflow: hidden;
+        }
+
+        .dropdown.active .dropdown-content {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 0.8rem 1.2rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            color: #333;
+            text-decoration: none;
+        }
+
+        .dropdown-item:hover {
+            background: #f5f5f5;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: #e0e0e0;
+            margin: 0.5rem 0;
+        }
+
+        /* Loader */
+        .loader {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem;
+        }
+
+        .loader.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #000;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 1rem;
+            }
+
+            .page-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .resumes-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .user-name {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Навигация -->
+    <nav class="navbar">
+        <a href="index.html" class="logo">Resume Builder</a>
+        <div class="nav-right">
+            <a href="templates.html" class="btn btn-outline">Шаблоны</a>
+            <div class="dropdown" id="userDropdown">
+                <div class="user-info" onclick="toggleDropdown()">
+                    <div class="user-avatar" id="userAvatar">U</div>
+                    <span class="user-name" id="userName">Пользователь</span>
+                </div>
+                <div class="dropdown-content">
+                    <a href="profile.html" class="dropdown-item">
+                        <span>👤</span> Профиль
+                    </a>
+                    <a href="dashboard.html" class="dropdown-item">
+                        <span>📋</span> Мои резюме
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <a href="#" class="dropdown-item" onclick="logout()">
+                        <span>🚪</span> Выйти
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Контейнер -->
+    <div class="container">
+        <!-- Хедер страницы -->
+        <div class="page-header">
+            <h1>Мои резюме</h1>
+            <a href="create-resume.html" class="btn btn-primary">+ Создать резюме</a>
+        </div>
+
+        <!-- Статистика -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon purple">📄</div>
+                <div class="stat-number" id="totalResumes">0</div>
+                <div class="stat-label">Всего резюме</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon blue">⭐</div>
+                <div class="stat-number" id="primaryResumes">0</div>
+                <div class="stat-label">Основное резюме</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon green">✅</div>
+                <div class="stat-number" id="completedResumes">0</div>
+                <div class="stat-label">Завершённые</div>
+            </div>
+        </div>
+
+        <!-- Лоадер -->
+        <div class="loader" id="loader">
+            <div class="spinner"></div>
+        </div>
+
+        <!-- Список резюме -->
+        <div class="resumes-section" id="resumesSection" style="display: none;">
+            <h2>Ваши резюме</h2>
+            <div class="resumes-grid" id="resumesGrid"></div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <div class="empty-icon">📄</div>
+            <h3>У вас пока нет резюме</h3>
+            <p>Создайте своё первое профессиональное резюме прямо сейчас!</p>
+            <a href="create-resume.html" class="btn btn-primary">Создать первое резюме</a>
+        </div>
+    </div>
+
+    <!-- Модальное окно удаления -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Удалить резюме?</h3>
+                <button class="modal-close" onclick="closeDeleteModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <p>Вы уверены, что хотите удалить резюме "<strong id="deleteResumeName"></strong>"? Это действие нельзя отменить.</p>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeDeleteModal()">Отмена</button>
+                <button class="btn btn-danger" onclick="confirmDelete()">Удалить</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let resumes = [];
+        let resumeToDelete = null;
+
+        // Проверка авторизации
+        function checkAuth() {
+            const token = localStorage.getItem('access_token');
+            if (!token) {
+                window.location.href = 'index.html';
+                return false;
+            }
+            return true;
+        }
+
+        // Загрузка профиля
+        async function loadProfile() {
+            try {
+                const token = localStorage.getItem('access_token');
+                const response = await fetch('http://localhost:8000/api/users/profile/', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const user = await response.json();
+                    document.getElementById('userName').textContent = user.username;
+                    document.getElementById('userAvatar').textContent = user.username.charAt(0).toUpperCase();
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки профиля:', error);
+            }
+        }
+
+        // Загрузка резюме
+        async function loadResumes() {
+            const loader = document.getElementById('loader');
+            const resumesSection = document.getElementById('resumesSection');
+            const emptyState = document.getElementById('emptyState');
+            
+            loader.classList.add('active');
+
+            try {
+                const token = localStorage.getItem('access_token');
+                const response = await fetch('http://localhost:8000/api/resumes/', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    resumes = data.results || data;
+
+                    if (resumes.length === 0) {
+                        emptyState.style.display = 'block';
+                        resumesSection.style.display = 'none';
+                    } else {
+                        emptyState.style.display = 'none';
+                        resumesSection.style.display = 'block';
+                        renderResumes();
+                        updateStats();
+                    }
+                } else {
+                    throw new Error('Ошибка загрузки резюме');
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                alert('Не удалось загрузить резюме');
+            } finally {
+                loader.classList.remove('active');
+            }
+        }
+
+        // Отображение резюме
+        function renderResumes() {
+            const grid = document.getElementById('resumesGrid');
+            grid.innerHTML = '';
+
+            resumes.forEach(resume => {
+                const card = createResumeCard(resume);
+                grid.appendChild(card);
+            });
+        }
+
+        // Создание карточки резюме
+        function createResumeCard(resume) {
+            const card = document.createElement('div');
+            card.className = 'resume-card';
+            
+            const completion = resume.completion_percentage || 0;
+            const updatedDate = new Date(resume.updated_at).toLocaleDateString('ru-RU');
+
+            card.innerHTML = `
+                <div class="resume-preview">
+                    <div class="resume-preview-icon">📄</div>
+                    ${resume.is_primary ? '<div class="resume-badge primary">Основное</div>' : ''}
+                </div>
+                <div class="resume-content">
+                    <div class="resume-title">${resume.title}</div>
+                    <div class="resume-meta">
+                        <span>📅 ${updatedDate}</span>
+                        <span>📝 ${resume.template_name || 'Без шаблона'}</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${completion}%"></div>
+                    </div>
+                    <div class="progress-label">Заполнено на ${completion}%</div>
+                    <div class="resume-actions">
+                        <a href="create-resume.html?id=${resume.id}" class="btn btn-primary btn-sm">Редактировать</a>
+                        <button class="btn btn-outline btn-sm" onclick="viewResume(${resume.id})">Просмотр</button>
+                        <button class="btn btn-outline btn-icon" onclick="deleteResume(${resume.id}, '${resume.title}')">🗑️</button>
+                    </div>
+                </div>
+            `;
+
+            return card;
+        }
+
+        // Обновление статистики
+        function updateStats() {
+            document.getElementById('totalResumes').textContent = resumes.length;
+            
+            const primaryCount = resumes.filter(r => r.is_primary).length;
+            document.getElementById('primaryResumes').textContent = primaryCount;
+
+            const completedCount = resumes.filter(r => (r.completion_percentage || 0) >= 80).length;
+            document.getElementById('completedResumes').textContent = completedCount;
+        }
+
+        // Просмотр резюме
+        async function viewResume(id) {
+            try {
+                const token = localStorage.getItem('access_token');
+                const response = await fetch(`http://localhost:8000/api/resumes/${id}/preview/`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    // Открыть предпросмотр в новом окне
+                    const previewWindow = window.open('', '_blank');
+                    previewWindow.document.write(`
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                            <title>Предпросмотр резюме</title>
+                            <style>${data.css}</style>
+                        </head>
+                        <body>
+                            ${data.html}
+                        </body>
+                        </html>
+                    `);
+                }
+            } catch (error) {
+                console.error('Ошибка просмотра:', error);
+                alert('Не удалось загрузить предпросмотр');
+            }
+        }
+
+        // Удаление резюме
+        function deleteResume(id, title) {
+            resumeToDelete = id;
+            document.getElementById('deleteResumeName').textContent = title;
+            document.getElementById('deleteModal').classList.add('active');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('active');
+            resumeToDelete = null;
+        }
+
+        async function confirmDelete() {
+            if (!resumeToDelete) return;
+
+            try {
+                const token = localStorage.getItem('access_token');
+                const response = await fetch(`http://localhost:8000/api/resumes/${resumeToDelete}/delete/`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    closeDeleteModal();
+                    loadResumes();
+                } else {
+                    throw new Error('Ошибка удаления');
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                alert('Не удалось удалить резюме');
+            }
+        }
+
+        // Dropdown
+        function toggleDropdown() {
+            document.getElementById('userDropdown').classList.toggle('active');
+        }
+
+        // Закрытие dropdown при клике вне его
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('userDropdown');
+            if (!dropdown.contains(e.target)) {
+                dropdown.classList.remove('active');
+            }
+        });
+
+        // Выход
+        function logout() {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            window.location.href = 'index.html';
+        }
+
+        // Инициализация
+        if (checkAuth()) {
+            loadProfile();
+            loadResumes();
+        }
+    </script>
+</body>
+</html>
