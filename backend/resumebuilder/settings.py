@@ -1,5 +1,6 @@
 from pathlib import Path
 from datetime import timedelta
+import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -7,7 +8,7 @@ SECRET_KEY = "django-insecure-))3a=gs*6$dt!7x%9%=ay)#vn0m!xia9d8qw-gw7zpbfy%-t9w
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '*']
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -38,7 +39,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # CORS должен быть вторым
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -54,10 +55,11 @@ TEMPLATES = [
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
             BASE_DIR.parent / 'frontend',
-         ],
+        ],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
+                "django.template.context_processors.debug",
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
@@ -101,9 +103,15 @@ TIME_ZONE = "Asia/Bishkek"
 USE_I18N = True
 USE_TZ = True
 
-STATIC_URL = "static/"
+# Статические файлы
+STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [
+    BASE_DIR.parent / 'frontend' / 'css',
+    BASE_DIR.parent / 'frontend' / 'js',
+]
 
+# Медиа файлы
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
@@ -149,6 +157,14 @@ SIMPLE_JWT = {
     'TOKEN_TYPE_CLAIM': 'token_type',
 }
 
-# CORS settings
-CORS_ALLOW_ALL_ORIGINS = True  # В продакшене нужно указать конкретные домены
+# CORS settings - для разработки
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = False  # В продакшене должно быть False
+
+# Для разработки можно временно включить
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
