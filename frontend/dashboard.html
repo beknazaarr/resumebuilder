@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мои резюме - Resume Builder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        header {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-menu a {
+            text-decoration: none;
+            color: #64748b;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-menu a:hover, .nav-menu a.active {
+            color: #2563eb;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            position: relative;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 0.5rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            min-width: 200px;
+            display: none;
+        }
+
+        .user-dropdown.show {
+            display: block;
+        }
+
+        .user-dropdown a, .user-dropdown button {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: #334155;
+            text-decoration: none;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .user-dropdown a:hover, .user-dropdown button:hover {
+            background: #f1f5f9;
+        }
+
+        .user-dropdown button {
+            color: #ef4444;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            color: #64748b;
+            font-size: 1.1rem;
+        }
+
+        .actions-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .search-box {
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #2563eb;
+            border: 2px solid #2563eb;
+        }
+
+        .btn-secondary:hover {
+            background: #eff6ff;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-icon {
+            padding: 0.5rem;
+            background: none;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .btn-icon:hover {
+            background: #f1f5f9;
+            color: #2563eb;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .stat-card h3 {
+            color: #64748b;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1e293b;
+        }
+
+        /* Resume Cards */
+        .resumes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .resume-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .resume-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        }
+
+        .resume-preview {
+            height: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+            position: relative;
+        }
+
+        .resume-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255,255,255,0.9);
+            color: #2563eb;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .resume-info {
+            padding: 1.5rem;
+        }
+
+        .resume-info h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+            color: #1e293b;
+        }
+
+        .resume-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #64748b;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        .resume-actions {
+            display: flex;
+            gap: 0.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .resume-actions button {
+            flex: 1;
+            padding: 0.5rem;
+            background: none;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+        }
+
+        .resume-actions button:hover {
+            background: #f1f5f9;
+            border-color: #2563eb;
+            color: #2563eb;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .empty-state svg {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 1.5rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h2 {
+            font-size: 1.5rem;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            color: #64748b;
+            margin-bottom: 2rem;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+            color: #1e293b;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #64748b;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #334155;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #2563eb;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .nav-menu {
+                display: none;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .resumes-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav>
+            <a href="/index.html" class="logo">Resume Builder</a>
+            <div class="nav-menu">
+                <a href="/dashboard.html" class="active">Панель инструментов</a>
+                <a href="/templates.html">Шаблоны</a>
+            </div>
+            <div class="user-menu">
+                <div class="user-avatar" onclick="toggleUserMenu()">
+                    <span id="userInitial">U</span>
+                </div>
+                <div class="user-dropdown" id="userDropdown">
+                    <a href="/profile.html">👤 Профиль</a>
+                    <a href="/admin.html" id="adminLink" style="display: none;">⚙️ Админ панель</a>
+                    <button onclick="logout()">🚪 Выйти</button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1>Панель инструментов</h1>
+            <p id="welcomeText">Управляйте своими резюме</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Всего резюме</h3>
+                <div class="value" id="totalResumes">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Основное резюме</h3>
+                <div class="value" id="primaryResume">Не выбрано</div>
+            </div>
+            <div class="stat-card">
+                <h3>Последнее обновление</h3>
+                <div class="value" id="lastUpdate">-</div>
+            </div>
+        </div>
+
+        <!-- Actions Bar -->
+        <div class="actions-bar">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="🔍 Поиск резюме..." onkeyup="filterResumes()">
+            </div>
+            <button class="btn btn-primary" onclick="openCreateModal()">
+                ➕ Создать новое резюме
+            </button>
+        </div>
+
+        <!-- Loading -->
+        <div id="loading" class="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>Загрузка резюме...</p>
+        </div>
+
+        <!-- Alert -->
+        <div id="alertBox" style="display: none;"></div>
+
+        <!-- Resumes Grid -->
+        <div class="resumes-grid" id="resumesGrid"></div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            <h2>У вас пока нет резюме</h2>
+            <p>Создайте своё первое профессиональное резюме прямо сейчас</p>
+            <button class="btn btn-primary" onclick="openCreateModal()">Создать резюме</button>
+        </div>
+    </div>
+
+    <!-- Create Resume Modal -->
+    <div class="modal" id="createModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Создать новое резюме</h2>
+                <button class="close-btn" onclick="closeCreateModal()">&times;</button>
+            </div>
+            <form id="createForm">
+                <div class="form-group">
+                    <label>Название резюме</label>
+                    <input type="text" id="resumeTitle" required placeholder="Например: Frontend разработчик">
+                </div>
+                <div class="form-group">
+                    <label>Выберите шаблон</label>
+                    <select id="templateSelect" required>
+                        <option value="">Загрузка...</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Создать резюме</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Удалить резюме?</h2>
+                <button class="close-btn" onclick="closeDeleteModal()">&times;</button>
+            </div>
+            <p>Вы уверены, что хотите удалить резюме "<span id="deleteResumeName"></span>"?</p>
+            <p style="color: #64748b; margin-top: 0.5rem;">Это действие нельзя отменить.</p>
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button class="btn btn-secondary" onclick="closeDeleteModal()" style="flex: 1;">Отмена</button>
+                <button class="btn btn-danger" onclick="confirmDelete()" style="flex: 1;">Удалить</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        // Проверка авторизации
+        requireAuth();
+
+        let resumes = [];
+        let templates = [];
+        let deleteResumeId = null;
+
+        // Инициализация страницы
+        async function initPage() {
+            const user = getCurrentUser();
+            if (user) {
+                document.getElementById('userInitial').textContent = user.username.charAt(0).toUpperCase();
+                document.getElementById('welcomeText').textContent = `Добро пожаловать, ${user.first_name || user.username}!`;
+                
+                // Показать админ ссылку если админ
+                if (user.is_staff) {
+                    document.getElementById('adminLink').style.display = 'block';
+                }
+            }
+
+            await loadResumes();
+            await loadTemplates();
+        }
+
+        // Загрузка резюме
+        async function loadResumes() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('resumesGrid').innerHTML = '';
+            document.getElementById('emptyState').style.display = 'none';
+
+            try {
+                const data = await API.resumes.list();
+                resumes = data.results || data;
+                
+                if (resumes.length === 0) {
+                    document.getElementById('emptyState').style.display = 'block';
+                } else {
+                    renderResumes(resumes);
+                    updateStats(resumes);
+                }
+            } catch (error) {
+                console.error('Error loading resumes:', error);
+                showAlert('Ошибка загрузки резюме', 'error');
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        // Отрисовка резюме
+        function renderResumes(resumesList) {
+            const grid = document.getElementById('resumesGrid');
+            grid.innerHTML = '';
+
+            resumesList.forEach(resume => {
+                const card = document.createElement('div');
+                card.className = 'resume-card';
+                card.innerHTML = `
+                    <div class="resume-preview" onclick="window.location.href='/resume-editor.html?id=${resume.id}'">
+                        📄
+                        ${resume.is_primary ? '<span class="resume-badge">Основное</span>' : ''}
+                    </div>
+                    <div class="resume-info">
+                        <h3>${resume.title}</h3>
+                        <div class="resume-meta">
+                            <span>📅 ${formatDate(resume.updated_at)}</span>
+                            <span>${resume.template_name || 'Без шаблона'}</span>
+                        </div>
+                        <div class="resume-actions">
+                            <button onclick="editResume(${resume.id})" title="Редактировать">✏️</button>
+                            <button onclick="copyResume(${resume.id})" title="Копировать">📋</button>
+                            <button onclick="exportPDF(${resume.id})" title="Скачать PDF">📥</button>
+                            ${!resume.is_primary ? `<button onclick="setPrimary(${resume.id})" title="Сделать основным">⭐</button>` : ''}
+                            <button onclick="openDeleteModal(${resume.id}, '${resume.title}')" title="Удалить">🗑️</button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Обновление статистики
+        function updateStats(resumesList) {
+            document.getElementById('totalResumes').textContent = resumesList.length;
+            
+            const primary = resumesList.find(r => r.is_primary);
+            document.getElementById('primaryResume').textContent = primary ? primary.title : 'Не выбрано';
+            
+            if (resumesList.length > 0) {
+                const latest = resumesList[0];
+                document.getElementById('lastUpdate').textContent = formatDate(latest.updated_at);
+            }
+        }
+
+        // Загрузка шаблонов
+        async function loadTemplates() {
+            try {
+                const data = await API.templates.list();
+                templates = data.results || data;
+                
+                const select = document.getElementById('templateSelect');
+                select.innerHTML = '<option value="">Выберите шаблон</option>';
+                
+                templates.forEach(template => {
+                    const option = document.createElement('option');
+                    option.value = template.id;
+                    option.textContent = template.name;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading templates:', error);
+            }
+        }
+
+        // Открыть модальное окно создания
+        function openCreateModal() {
+            document.getElementById('createModal').classList.add('active');
+        }
+
+        // Закрыть модальное окно создания
+        function closeCreateModal() {
+            document.getElementById('createModal').classList.remove('active');
+            document.getElementById('createForm').reset();
+        }
+
+        // Создать резюме
+        document.getElementById('createForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const data = {
+                title: document.getElementById('resumeTitle').value,
+                template: parseInt(document.getElementById('templateSelect').value)
+            };
+
+            try {
+                const response = await API.resumes.create(data);
+                showAlert('Резюме успешно создано!', 'success');
+                closeCreateModal();
+                await loadResumes();
+                
+                // Перенаправить на редактор
+                setTimeout(() => {
+                    window.location.href = `/resume-editor.html?id=${response.resume.id}`;
+                }, 1000);
+            } catch (error) {
+                console.error('Error creating resume:', error);
+                showAlert('Ошибка создания резюме', 'error');
+            }
+        });
+
+        // Редактировать резюме
+        function editResume(id) {
+            window.location.href = `/resume-editor.html?id=${id}`;
+        }
+
+        // Копировать резюме
+        async function copyResume(id) {
+            if (!confirm('Создать копию этого резюме?')) return;
+
+            try {
+                await API.resumes.copy(id);
+                showAlert('Резюме успешно скопировано!', 'success');
+                await loadResumes();
+            } catch (error) {
+                console.error('Error copying resume:', error);
+                showAlert('Ошибка копирования резюме', 'error');
+            }
+        }
+
+        // Экспорт в PDF
+        function exportPDF(id) {
+            API.resumes.exportPDF(id);
+        }
+
+        // Установить как основное
+        async function setPrimary(id) {
+            try {
+                await API.resumes.setPrimary(id);
+                showAlert('Резюме установлено как основное!', 'success');
+                await loadResumes();
+            } catch (error) {
+                console.error('Error setting primary:', error);
+                showAlert('Ошибка установки основного резюме', 'error');
+            }
+        }
+
+        // Открыть модальное окно удаления
+        function openDeleteModal(id, title) {
+            deleteResumeId = id;
+            document.getElementById('deleteResumeName').textContent = title;
+            document.getElementById('deleteModal').classList.add('active');
+        }
+
+        // Закрыть модальное окно удаления
+        function closeDeleteModal() {
+            deleteResumeId = null;
+            document.getElementById('deleteModal').classList.remove('active');
+        }
+
+        // Подтвердить удаление
+        async function confirmDelete() {
+            if (!deleteResumeId) return;
+
+            try {
+                await API.resumes.delete(deleteResumeId);
+                showAlert('Резюме успешно удалено!', 'success');
+                closeDeleteModal();
+                await loadResumes();
+            } catch (error) {
+                console.error('Error deleting resume:', error);
+                showAlert('Ошибка удаления резюме', 'error');
+            }
+        }
+
+        // Фильтрация резюме
+        function filterResumes() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = resumes.filter(r => 
+                r.title.toLowerCase().includes(search)
+            );
+            renderResumes(filtered);
+        }
+
+        // Переключение меню пользователя
+        function toggleUserMenu() {
+            document.getElementById('userDropdown').classList.toggle('show');
+        }
+
+        // Закрыть меню при клике вне его
+        window.onclick = function(event) {
+            if (!event.target.matches('.user-avatar')) {
+                const dropdown = document.getElementById('userDropdown');
+                if (dropdown.classList.contains('show')) {
+                    dropdown.classList.remove('show');
+                }
+            }
+            
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+            }
+        }
+
+        // Показать алерт
+        function showAlert(message, type = 'success') {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.className = `alert alert-${type}`;
+            alertBox.textContent = message;
+            alertBox.style.display = 'block';
+            
+            setTimeout(() => {
+                alertBox.style.display = 'none';
+            }, 3000);
+        }
+
+        // Форматирование даты
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diff = now - date;
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            
+            if (days === 0) return 'Сегодня';
+            if (days === 1) return 'Вчера';
+            if (days < 7) return `${days} дн. назад`;
+            
+            return date.toLocaleDateString('ru-RU');
+        }
+
+        // Инициализация при загрузке
+        initPage();
+    </script>
+</body>
+</html>

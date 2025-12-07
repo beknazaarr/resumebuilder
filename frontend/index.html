@@ -706,37 +706,53 @@
     </div>
 
     <script>
+        // Перенаправляем на отдельные страницы вместо модальных окон
         function openModal(type) {
-            const modal = document.getElementById(type + 'Modal');
-            modal.classList.add('active');
+            if (type === 'login') {
+                window.location.href = '/login.html';
+            } else if (type === 'register') {
+                window.location.href = '/register.html';
+            }
         }
 
         function closeModal(type) {
             const modal = document.getElementById(type + 'Modal');
-            modal.classList.remove('active');
-        }
-
-        function switchModal(from, to) {
-            closeModal(from);
-            openModal(to);
-        }
-
-        // Close modal on outside click
-        window.onclick = function(event) {
-            if (event.target.classList.contains('modal')) {
-                event.target.classList.remove('active');
+            if (modal) {
+                modal.classList.remove('active');
             }
         }
 
-        // Form submissions (заглушки)
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            alert('Функция входа будет реализована с подключением к API');
-        });
+        function switchModal(from, to) {
+            if (to === 'login') {
+                window.location.href = '/login.html';
+            } else if (to === 'register') {
+                window.location.href = '/register.html';
+            }
+        }
 
-        document.getElementById('registerForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            alert('Функция регистрации будет реализована с подключением к API');
+        // Проверка авторизации при загрузке
+        window.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('access_token');
+            if (token) {
+                // Пользователь уже авторизован, показываем другие кнопки
+                const authButtons = document.querySelectorAll('.btn-secondary, .btn-primary');
+                authButtons.forEach(btn => {
+                    if (btn.textContent.includes('Авторизация') || btn.textContent.includes('Регистрация')) {
+                        btn.style.display = 'none';
+                    }
+                });
+                
+                // Добавляем кнопку перехода в панель
+                const nav = document.querySelector('.nav-links');
+                if (nav && !document.getElementById('dashboardBtn')) {
+                    const dashboardBtn = document.createElement('a');
+                    dashboardBtn.href = '/dashboard.html';
+                    dashboardBtn.className = 'btn btn-primary';
+                    dashboardBtn.textContent = 'Мои резюме';
+                    dashboardBtn.id = 'dashboardBtn';
+                    nav.appendChild(dashboardBtn);
+                }
+            }
         });
     </script>
 </body>

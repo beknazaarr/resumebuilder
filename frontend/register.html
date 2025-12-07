@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация - Resume Builder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .auth-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 450px;
+            padding: 3rem;
+        }
+
+        .logo {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #64748b;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 2rem;
+            color: #1e293b;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #334155;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.875rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 2rem 0;
+            color: #94a3b8;
+            position: relative;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 40%;
+            height: 1px;
+            background: #e2e8f0;
+        }
+
+        .divider::before {
+            left: 0;
+        }
+
+        .divider::after {
+            right: 0;
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: #64748b;
+        }
+
+        .auth-footer a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 1rem 0;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <a href="/index.html" class="back-link">← Вернуться на главную</a>
+        
+        <div class="logo">Resume Builder</div>
+        <p class="subtitle">Создайте аккаунт</p>
+
+        <h1>Регистрация</h1>
+
+        <div id="alertBox" class="alert"></div>
+
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="username">Логин</label>
+                <input type="text" id="username" name="username" required 
+                       placeholder="Введите логин">
+                <div class="error-message" id="usernameError"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Электронная почта</label>
+                <input type="email" id="email" name="email" required 
+                       placeholder="example@mail.com">
+                <div class="error-message" id="emailError"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="firstName">Имя (необязательно)</label>
+                <input type="text" id="firstName" name="first_name" 
+                       placeholder="Ваше имя">
+            </div>
+
+            <div class="form-group">
+                <label for="lastName">Фамилия (необязательно)</label>
+                <input type="text" id="lastName" name="last_name" 
+                       placeholder="Ваша фамилия">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Пароль</label>
+                <input type="password" id="password" name="password" required 
+                       placeholder="Минимум 8 символов">
+                <div class="error-message" id="passwordError"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="password2">Подтвердите пароль</label>
+                <input type="password" id="password2" name="password2" required 
+                       placeholder="Повторите пароль">
+                <div class="error-message" id="password2Error"></div>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Создание аккаунта...</p>
+            </div>
+
+            <button type="submit" class="btn" id="submitBtn">Зарегистрироваться</button>
+        </form>
+
+        <div class="auth-footer">
+            Уже есть аккаунт? <a href="/login.html">Войти</a>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        const form = document.getElementById('registerForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const loading = document.getElementById('loading');
+        const alertBox = document.getElementById('alertBox');
+
+        // Показать ошибку
+        function showError(fieldId, message) {
+            const errorEl = document.getElementById(fieldId + 'Error');
+            errorEl.textContent = message;
+            errorEl.classList.add('show');
+        }
+
+        // Очистить ошибки
+        function clearErrors() {
+            document.querySelectorAll('.error-message').forEach(el => {
+                el.classList.remove('show');
+            });
+            alertBox.classList.remove('show');
+        }
+
+        // Показать alert
+        function showAlert(message, type = 'error') {
+            alertBox.textContent = message;
+            alertBox.className = `alert alert-${type} show`;
+        }
+
+        // Валидация формы
+        function validateForm(data) {
+            clearErrors();
+            let isValid = true;
+
+            if (data.username.length < 3) {
+                showError('username', 'Логин должен содержать минимум 3 символа');
+                isValid = false;
+            }
+
+            if (!data.email.includes('@')) {
+                showError('email', 'Введите корректный email');
+                isValid = false;
+            }
+
+            if (data.password.length < 8) {
+                showError('password', 'Пароль должен содержать минимум 8 символов');
+                isValid = false;
+            }
+
+            if (data.password !== data.password2) {
+                showError('password2', 'Пароли не совпадают');
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        // Обработка регистрации
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = {
+                username: document.getElementById('username').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                first_name: document.getElementById('firstName').value.trim(),
+                last_name: document.getElementById('lastName').value.trim(),
+                password: document.getElementById('password').value,
+                password2: document.getElementById('password2').value
+            };
+
+            if (!validateForm(formData)) {
+                return;
+            }
+
+            // Показываем загрузку
+            submitBtn.disabled = true;
+            loading.classList.add('show');
+            clearErrors();
+
+            try {
+                const response = await API.auth.register(formData);
+                
+                // Сохраняем токены и данные пользователя
+                setTokens(response.access, response.refresh);
+                setCurrentUser(response.user);
+
+                showAlert('Регистрация успешна! Перенаправление...', 'success');
+
+                // Перенаправляем на dashboard через 1 секунду
+                setTimeout(() => {
+                    window.location.href = '/dashboard.html';
+                }, 1000);
+
+            } catch (error) {
+                console.error('Registration error:', error);
+                
+                // Обработка ошибок от API
+                if (error.username) {
+                    showError('username', error.username[0]);
+                }
+                if (error.email) {
+                    showError('email', error.email[0]);
+                }
+                if (error.password) {
+                    showError('password', error.password[0]);
+                }
+                if (error.password2) {
+                    showError('password2', error.password2[0]);
+                }
+                
+                if (!error.username && !error.email && !error.password && !error.password2) {
+                    showAlert(error.error || 'Ошибка регистрации. Попробуйте снова.');
+                }
+
+            } finally {
+                submitBtn.disabled = false;
+                loading.classList.remove('show');
+            }
+        });
+
+        // Очистка ошибок при вводе
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', () => {
+                const errorEl = document.getElementById(input.id + 'Error');
+                if (errorEl) {
+                    errorEl.classList.remove('show');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
