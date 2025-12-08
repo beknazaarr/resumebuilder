@@ -106,9 +106,10 @@ USE_TZ = True
 # Статические файлы
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# ВАЖНО: Добавьте ВСЮ папку frontend, а не отдельные подпапки
 STATICFILES_DIRS = [
-    BASE_DIR.parent / 'frontend' / 'css',
-    BASE_DIR.parent / 'frontend' / 'js',
+    BASE_DIR.parent / 'frontend',  # ← Вся папка frontend
 ]
 
 # Медиа файлы

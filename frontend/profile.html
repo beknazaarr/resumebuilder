@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль - Resume Builder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            min-height: 100vh;
+        }
+
+        header {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-menu a {
+            text-decoration: none;
+            color: #64748b;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-menu a:hover, .nav-menu a.active {
+            color: #2563eb;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            position: relative;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 0.5rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            min-width: 200px;
+            display: none;
+        }
+
+        .user-dropdown.show {
+            display: block;
+        }
+
+        .user-dropdown a, .user-dropdown button {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: #334155;
+            text-decoration: none;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .user-dropdown a:hover, .user-dropdown button:hover {
+            background: #f1f5f9;
+        }
+
+        .user-dropdown button {
+            color: #ef4444;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            color: #64748b;
+            font-size: 1.1rem;
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            color: #1e293b;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #334155;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        .form-group input:disabled {
+            background: #f1f5f9;
+            cursor: not-allowed;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #2563eb;
+            border: 2px solid #2563eb;
+        }
+
+        .btn-secondary:hover {
+            background: #eff6ff;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-item label {
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .info-item span {
+            color: #1e293b;
+            font-weight: 600;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #2563eb;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .nav-menu {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/index.html" class="logo">Resume Builder</a>
+            <div class="nav-menu">
+                <a href="/dashboard.html">Панель инструментов</a>
+                <a href="/templates.html">Шаблоны</a>
+            </div>
+            <div class="user-menu">
+                <div class="user-avatar" onclick="toggleUserMenu()">
+                    <span id="userInitial">U</span>
+                </div>
+                <div class="user-dropdown" id="userDropdown">
+                    <a href="/profile.html">👤 Профиль</a>
+                    <a href="/admin.html" id="adminLink" style="display: none;">⚙️ Админ панель</a>
+                    <button onclick="logout()">🚪 Выйти</button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Мой профиль</h1>
+            <p>Управляйте своими личными данными</p>
+        </div>
+
+        <div id="alertBox" class="alert"></div>
+
+        <div id="loading" class="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>Загрузка...</p>
+        </div>
+
+        <!-- Информация об аккаунте -->
+        <div class="profile-card">
+            <h2 class="section-title">Информация об аккаунте</h2>
+            <div class="info-item">
+                <label>Логин</label>
+                <span id="displayUsername">-</span>
+            </div>
+            <div class="info-item">
+                <label>Email</label>
+                <span id="displayEmail">-</span>
+            </div>
+            <div class="info-item">
+                <label>Дата регистрации</label>
+                <span id="displayCreatedAt">-</span>
+            </div>
+        </div>
+
+        <!-- Редактирование профиля -->
+        <div class="profile-card">
+            <h2 class="section-title">Редактировать профиль</h2>
+            <form id="profileForm">
+                <div class="form-group">
+                    <label for="username">Логин</label>
+                    <input type="text" id="username" name="username" required>
+                    <div class="error-message" id="usernameError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                    <div class="error-message" id="emailError"></div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="firstName">Имя</label>
+                        <input type="text" id="firstName" name="first_name">
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Фамилия</label>
+                        <input type="text" id="lastName" name="last_name">
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary" id="saveBtn">Сохранить изменения</button>
+                    <button type="button" class="btn btn-secondary" onclick="loadProfile()">Отмена</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Смена пароля -->
+        <div class="profile-card">
+            <h2 class="section-title">Сменить пароль</h2>
+            <form id="passwordForm">
+                <div class="form-group">
+                    <label for="oldPassword">Текущий пароль</label>
+                    <input type="password" id="oldPassword" name="old_password" required>
+                    <div class="error-message" id="oldPasswordError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="newPassword">Новый пароль</label>
+                    <input type="password" id="newPassword" name="new_password" required placeholder="Минимум 8 символов">
+                    <div class="error-message" id="newPasswordError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="newPassword2">Подтвердите новый пароль</label>
+                    <input type="password" id="newPassword2" name="new_password2" required>
+                    <div class="error-message" id="newPassword2Error"></div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="changePasswordBtn">Сменить пароль</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/auth.js"></script>
+    <script>
+        requireAuth();
+
+        const user = getCurrentUser();
+        if (user) {
+            document.getElementById('userInitial').textContent = user.username.charAt(0).toUpperCase();
+            if (user.is_staff) {
+                document.getElementById('adminLink').style.display = 'block';
+            }
+        }
+
+        // Загрузка профиля
+        async function loadProfile() {
+            document.getElementById('loading').style.display = 'block';
+            
+            try {
+                const profile = await API.auth.getProfile();
+                
+                // Отображение информации
+                document.getElementById('displayUsername').textContent = profile.username;
+                document.getElementById('displayEmail').textContent = profile.email;
+                document.getElementById('displayCreatedAt').textContent = formatDate(profile.created_at);
+                
+                // Заполнение формы
+                document.getElementById('username').value = profile.username;
+                document.getElementById('email').value = profile.email;
+                document.getElementById('firstName').value = profile.first_name || '';
+                document.getElementById('lastName').value = profile.last_name || '';
+                
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                showAlert('Ошибка загрузки профиля', 'error');
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        // Обновление профиля
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            clearErrors();
+
+            const formData = {
+                username: document.getElementById('username').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                first_name: document.getElementById('firstName').value.trim(),
+                last_name: document.getElementById('lastName').value.trim()
+            };
+
+            const saveBtn = document.getElementById('saveBtn');
+            saveBtn.disabled = true;
+
+            try {
+                const response = await API.auth.updateProfile(formData);
+                
+                // Обновляем данные пользователя в localStorage
+                const updatedUser = getCurrentUser();
+                updatedUser.username = formData.username;
+                updatedUser.email = formData.email;
+                updatedUser.first_name = formData.first_name;
+                updatedUser.last_name = formData.last_name;
+                setCurrentUser(updatedUser);
+
+                showAlert('Профиль успешно обновлён!', 'success');
+                await loadProfile();
+
+            } catch (error) {
+                console.error('Error updating profile:', error);
+                
+                if (error.username) {
+                    showError('username', error.username[0]);
+                }
+                if (error.email) {
+                    showError('email', error.email[0]);
+                }
+                
+                if (!error.username && !error.email) {
+                    showAlert('Ошибка обновления профиля', 'error');
+                }
+            } finally {
+                saveBtn.disabled = false;
+            }
+        });
+
+        // Смена пароля
+        document.getElementById('passwordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            clearErrors();
+
+            const formData = {
+                old_password: document.getElementById('oldPassword').value,
+                new_password: document.getElementById('newPassword').value,
+                new_password2: document.getElementById('newPassword2').value
+            };
+
+            // Валидация
+            if (formData.new_password.length < 8) {
+                showError('newPassword', 'Пароль должен содержать минимум 8 символов');
+                return;
+            }
+
+            if (formData.new_password !== formData.new_password2) {
+                showError('newPassword2', 'Пароли не совпадают');
+                return;
+            }
+
+            const changeBtn = document.getElementById('changePasswordBtn');
+            changeBtn.disabled = true;
+
+            try {
+                await API.auth.changePassword(formData);
+                
+                showAlert('Пароль успешно изменён!', 'success');
+                document.getElementById('passwordForm').reset();
+
+            } catch (error) {
+                console.error('Error changing password:', error);
+                
+                if (error.old_password) {
+                    showError('oldPassword', error.old_password[0]);
+                }
+                if (error.new_password) {
+                    showError('newPassword', error.new_password[0]);
+                }
+                
+                if (error.error) {
+                    showAlert(error.error, 'error');
+                } else if (!error.old_password && !error.new_password) {
+                    showAlert('Ошибка смены пароля', 'error');
+                }
+            } finally {
+                changeBtn.disabled = false;
+            }
+        });
+
+        // Вспомогательные функции
+        function showAlert(message, type = 'success') {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.className = `alert alert-${type} show`;
+            alertBox.textContent = message;
+            
+            setTimeout(() => {
+                alertBox.classList.remove('show');
+            }, 5000);
+        }
+
+        function showError(fieldId, message) {
+            const errorEl = document.getElementById(fieldId + 'Error');
+            errorEl.textContent = message;
+            errorEl.classList.add('show');
+        }
+
+        function clearErrors() {
+            document.querySelectorAll('.error-message').forEach(el => {
+                el.classList.remove('show');
+            });
+            document.getElementById('alertBox').classList.remove('show');
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('ru-RU', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        function toggleUserMenu() {
+            document.getElementById('userDropdown').classList.toggle('show');
+        }
+
+        window.onclick = function(event) {
+            if (!event.target.matches('.user-avatar')) {
+                const dropdown = document.getElementById('userDropdown');
+                if (dropdown.classList.contains('show')) {
+                    dropdown.classList.remove('show');
+                }
+            }
+        }
+
+        // Очистка ошибок при вводе
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', () => {
+                const errorEl = document.getElementById(input.id + 'Error');
+                if (errorEl) {
+                    errorEl.classList.remove('show');
+                }
+            });
+        });
+
+        // Загрузка при открытии страницы
+        loadProfile();
+    </script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path, include, re_path
+from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework import permissions
@@ -40,14 +40,13 @@ urlpatterns = [
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     
-    # API endpoints - ВАЖНО: все API роуты должны быть ПЕРЕД фронтенд паттерном
+    # API endpoints
     path('api/users/', include('user.urls')),
     path('api/templates/', include('template.urls')),
     path('api/resumes/', include('resume.urls')),
     path('api/', include('personalinfo.urls')),
 ]
 
-# Динамически добавляем роуты для каждого ViewSet с resume_id
 # Education
 urlpatterns += [
     path('api/resumes/<int:resume_id>/education/', 
@@ -103,10 +102,15 @@ if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
-# ВАЖНО: Frontend маршрут должен быть ПОСЛЕДНИМ
-# Он перехватывает все остальные запросы и отдаёт index.html
+# Frontend маршруты - конкретные пути
 urlpatterns += [
-    re_path(r'^(?!api|admin|swagger|redoc|media|static).*$', 
-            TemplateView.as_view(template_name='index.html'), 
-            name='frontend'),
+    path('', TemplateView.as_view(template_name='index.html'), name='home'),
+    path('index.html', TemplateView.as_view(template_name='index.html'), name='index'),
+    path('login.html', TemplateView.as_view(template_name='login.html'), name='login'),
+    path('register.html', TemplateView.as_view(template_name='register.html'), name='register'),
+    path('dashboard.html', TemplateView.as_view(template_name='dashboard.html'), name='dashboard'),
+    path('profile.html', TemplateView.as_view(template_name='profile.html'), name='profile'),
+    path('resume-editor.html', TemplateView.as_view(template_name='resume-editor.html'), name='resume-editor'),
+    path('templates.html', TemplateView.as_view(template_name='templates.html'), name='templates-page'),
+    path('admin.html', TemplateView.as_view(template_name='admin.html'), name='admin-page'),
 ]

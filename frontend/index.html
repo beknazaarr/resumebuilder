@@ -17,7 +17,6 @@
             color: #333;
         }
 
-        /* Header */
         header {
             background: white;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
@@ -67,6 +66,7 @@
             border: none;
             cursor: pointer;
             font-size: 1rem;
+            display: inline-block;
         }
 
         .btn-primary {
@@ -91,7 +91,6 @@
             color: white;
         }
 
-        /* Hero Section */
         .hero {
             max-width: 1200px;
             margin: 0 auto;
@@ -186,7 +185,6 @@
         .resume-line:nth-child(3) { width: 80%; }
         .resume-line:nth-child(4) { width: 90%; }
 
-        /* Features */
         .features {
             background: #f8fafc;
             padding: 5rem 2rem;
@@ -254,7 +252,6 @@
             line-height: 1.6;
         }
 
-        /* Templates Section */
         .templates {
             padding: 5rem 2rem;
             max-width: 1200px;
@@ -306,7 +303,6 @@
             font-size: 0.9rem;
         }
 
-        /* CTA Section */
         .cta {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -336,7 +332,6 @@
             box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
         }
 
-        /* Footer */
         footer {
             background: #1e293b;
             color: white;
@@ -383,7 +378,6 @@
             color: #94a3b8;
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
             .hero {
                 grid-template-columns: 1fr;
@@ -403,95 +397,9 @@
                 font-size: 2rem;
             }
         }
-
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            max-width: 400px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-
-        .modal-header h2 {
-            font-size: 1.8rem;
-            color: #1e293b;
-        }
-
-        .close-btn {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #64748b;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #334155;
-            font-weight: 500;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.3s;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #2563eb;
-        }
-
-        .form-footer {
-            text-align: center;
-            margin-top: 1.5rem;
-            color: #64748b;
-        }
-
-        .form-footer a {
-            color: #2563eb;
-            text-decoration: none;
-            font-weight: 600;
-        }
     </style>
 </head>
 <body>
-    <!-- Header -->
     <header>
         <nav>
             <div class="logo">Resume Builder</div>
@@ -499,20 +407,19 @@
                 <a href="#features">Возможности</a>
                 <a href="#templates">Шаблоны</a>
                 <a href="#about">Контакты</a>
-                <button class="btn btn-secondary" onclick="openModal('login')">Авторизация</button>
-                <button class="btn btn-primary" onclick="openModal('register')">Регистрация</button>
+                <a href="/login.html" class="btn btn-secondary">Авторизация</a>
+                <a href="/register.html" class="btn btn-primary">Регистрация</a>
             </div>
         </nav>
     </header>
 
-    <!-- Hero Section -->
     <section class="hero">
         <div class="hero-content">
             <h1>Создайте резюме вашей мечты</h1>
             <p>Создавайте резюме всегда с Resume Builder и воплощайте свои мечты</p>
             <div class="hero-buttons">
-                <button class="btn btn-primary" onclick="openModal('register')">Создать</button>
-                <button class="btn btn-secondary" href="#templates">Выбрать шаблон</button>
+                <a href="/register.html" class="btn btn-primary">Создать</a>
+                <a href="#templates" class="btn btn-secondary">Выбрать шаблон</a>
             </div>
         </div>
         <div class="hero-image">
@@ -545,7 +452,6 @@
         </div>
     </section>
 
-    <!-- Features Section -->
     <section class="features" id="features">
         <div class="features-container">
             <h2 class="section-title">Почему выбирают нас</h2>
@@ -585,7 +491,6 @@
         </div>
     </section>
 
-    <!-- Templates Section -->
     <section class="templates" id="templates">
         <h2 class="section-title">Выберите шаблон или создайте свой шаблон</h2>
         <p class="section-subtitle">Профессиональные шаблоны на любой вкус</p>
@@ -614,14 +519,12 @@
         </div>
     </section>
 
-    <!-- CTA Section -->
     <section class="cta">
         <h2>Готовы создать своё резюме?</h2>
         <p>Присоединяйтесь к тысячам пользователей, которые уже нашли работу своей мечты</p>
-        <button class="btn btn-white" onclick="openModal('register')">Начать бесплатно</button>
+        <a href="/register.html" class="btn btn-white">Начать бесплатно</a>
     </section>
 
-    <!-- Footer -->
     <footer>
         <div class="footer-container">
             <div class="footer-section">
@@ -649,109 +552,13 @@
         </div>
     </footer>
 
-    <!-- Login Modal -->
-    <div class="modal" id="loginModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Авторизация</h2>
-                <button class="close-btn" onclick="closeModal('login')">&times;</button>
-            </div>
-            <form id="loginForm">
-                <div class="form-group">
-                    <label>Логин</label>
-                    <input type="text" placeholder="Введите логин" required>
-                </div>
-                <div class="form-group">
-                    <label>Пароль</label>
-                    <input type="password" placeholder="Введите пароль" required>
-                </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%;">Войти</button>
-                <div class="form-footer">
-                    Нет аккаунта? <a href="#" onclick="switchModal('login', 'register')">Зарегистрироваться</a>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Register Modal -->
-    <div class="modal" id="registerModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Регистрация</h2>
-                <button class="close-btn" onclick="closeModal('register')">&times;</button>
-            </div>
-            <form id="registerForm">
-                <div class="form-group">
-                    <label>Логин</label>
-                    <input type="text" placeholder="Введите логин" required>
-                </div>
-                <div class="form-group">
-                    <label>Электронная почта</label>
-                    <input type="email" placeholder="example@mail.com" required>
-                </div>
-                <div class="form-group">
-                    <label>Пароль</label>
-                    <input type="password" placeholder="Введите пароль" required>
-                </div>
-                <div class="form-group">
-                    <label>Подтвердите пароль</label>
-                    <input type="password" placeholder="Повторите пароль" required>
-                </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%;">Подтвердить</button>
-                <div class="form-footer">
-                    Уже есть аккаунт? <a href="#" onclick="switchModal('register', 'login')">Войти</a>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <script>
-        // Перенаправляем на отдельные страницы вместо модальных окон
-        function openModal(type) {
-            if (type === 'login') {
-                window.location.href = '/login.html';
-            } else if (type === 'register') {
-                window.location.href = '/register.html';
-            }
-        }
-
-        function closeModal(type) {
-            const modal = document.getElementById(type + 'Modal');
-            if (modal) {
-                modal.classList.remove('active');
-            }
-        }
-
-        function switchModal(from, to) {
-            if (to === 'login') {
-                window.location.href = '/login.html';
-            } else if (to === 'register') {
-                window.location.href = '/register.html';
-            }
-        }
-
         // Проверка авторизации при загрузке
         window.addEventListener('DOMContentLoaded', function() {
             const token = localStorage.getItem('access_token');
             if (token) {
-                // Пользователь уже авторизован, показываем другие кнопки
-                const authButtons = document.querySelectorAll('.btn-secondary, .btn-primary');
-                authButtons.forEach(btn => {
-                    if (btn.textContent.includes('Авторизация') || btn.textContent.includes('Регистрация')) {
-                        btn.style.display = 'none';
-                    }
-                });
-                
-                // Добавляем кнопку перехода в панель
-                const nav = document.querySelector('.nav-links');
-                if (nav && !document.getElementById('dashboardBtn')) {
-                    const dashboardBtn = document.createElement('a');
-                    dashboardBtn.href = '/dashboard.html';
-                    dashboardBtn.className = 'btn btn-primary';
-                    dashboardBtn.textContent = 'Мои резюме';
-                    dashboardBtn.id = 'dashboardBtn';
-                    nav.appendChild(dashboardBtn);
-                }
+                // Пользователь уже авторизован, перенаправляем на dashboard
+                window.location.href = '/dashboard.html';
             }
         });
     </script>
