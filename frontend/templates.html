@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Шаблоны резюме - Resume Builder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        header {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-menu a {
+            text-decoration: none;
+            color: #64748b;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-menu a:hover, .nav-menu a.active {
+            color: #2563eb;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            position: relative;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 0.5rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            min-width: 200px;
+            display: none;
+        }
+
+        .user-dropdown.show {
+            display: block;
+        }
+
+        .user-dropdown a, .user-dropdown button {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: #334155;
+            text-decoration: none;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .user-dropdown a:hover, .user-dropdown button:hover {
+            background: #f1f5f9;
+        }
+
+        .user-dropdown button {
+            color: #ef4444;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            color: #64748b;
+            font-size: 1.2rem;
+        }
+
+        /* Search and Filter */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            color: #64748b;
+        }
+
+        .filter-btn:hover {
+            border-color: #2563eb;
+            color: #2563eb;
+        }
+
+        .filter-btn.active {
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+
+        .results-info {
+            color: #64748b;
+            margin-bottom: 1rem;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #2563eb;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Templates Grid */
+        .templates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .template-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .template-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+        }
+
+        .template-preview {
+            height: 400px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 4rem;
+            font-weight: bold;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .template-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .template-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .template-card:hover .template-overlay {
+            opacity: 1;
+        }
+
+        .overlay-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: scale(1.05);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #2563eb;
+        }
+
+        .btn-secondary:hover {
+            background: #f1f5f9;
+        }
+
+        .template-info {
+            padding: 1.5rem;
+        }
+
+        .template-info h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+            color: #1e293b;
+        }
+
+        .template-info p {
+            color: #64748b;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 0.75rem;
+        }
+
+        .template-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.875rem;
+            color: #94a3b8;
+        }
+
+        .template-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: #eff6ff;
+            color: #2563eb;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .empty-state svg {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 1.5rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h2 {
+            font-size: 1.5rem;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            color: #64748b;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+            color: #1e293b;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #64748b;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .close-btn:hover {
+            background: #f1f5f9;
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .template-detail {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .template-detail-preview {
+            background: #f8fafc;
+            border-radius: 8px;
+            height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .template-detail-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 8px;
+        }
+
+        .template-detail-info h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #1e293b;
+        }
+
+        .template-detail-info p {
+            color: #64748b;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .detail-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-section h4 {
+            font-size: 0.875rem;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-section .value {
+            font-size: 1.1rem;
+            color: #1e293b;
+            font-weight: 500;
+        }
+
+        .modal-footer {
+            padding: 2rem;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        @media (max-width: 768px) {
+            .nav-menu {
+                display: none;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-box {
+                max-width: 100%;
+            }
+
+            .filter-buttons {
+                overflow-x: auto;
+                padding-bottom: 0.5rem;
+            }
+
+            .templates-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .template-detail {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav>
+            <a href="/index.html" class="logo">Resume Builder</a>
+            <div class="nav-menu">
+                <a href="/dashboard.html">Панель инструментов</a>
+                <a href="/templates.html" class="active">Шаблоны</a>
+            </div>
+            <div class="user-menu" id="userMenuContainer">
+                <div class="user-avatar" onclick="toggleUserMenu()">
+                    <span id="userInitial">U</span>
+                </div>
+                <div class="user-dropdown" id="userDropdown">
+                    <a href="/profile.html">👤 Профиль</a>
+                    <a href="/admin.html" id="adminLink" style="display: none;">⚙️ Админ панель</a>
+                    <button onclick="logout()">🚪 Выйти</button>
+                </div>
+            </div>
+            <!-- Для неавторизованных пользователей -->
+            <div id="authButtons" style="display: none;">
+                <a href="/login.html" class="btn btn-secondary">Войти</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1>Выберите шаблон резюме</h1>
+            <p>Профессиональные шаблоны для создания идеального резюме</p>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="🔍 Поиск шаблонов..." onkeyup="filterTemplates()">
+            </div>
+            <div class="filter-buttons">
+                <button class="filter-btn active" onclick="setFilter('all')">Все</button>
+                <button class="filter-btn" onclick="setFilter('classic')">Классические</button>
+                <button class="filter-btn" onclick="setFilter('modern')">Современные</button>
+                <button class="filter-btn" onclick="setFilter('creative')">Креативные</button>
+            </div>
+        </div>
+
+        <div class="results-info" id="resultsInfo"></div>
+
+        <!-- Loading -->
+        <div id="loading" class="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>Загрузка шаблонов...</p>
+        </div>
+
+        <!-- Templates Grid -->
+        <div class="templates-grid" id="templatesGrid"></div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            <h2>Шаблоны не найдены</h2>
+            <p>Попробуйте изменить параметры поиска</p>
+        </div>
+    </div>
+
+    <!-- Template Detail Modal -->
+    <div class="modal" id="templateModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTemplateName">Название шаблона</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="template-detail">
+                    <div class="template-detail-preview">
+                        <img id="modalPreviewImage" src="" alt="Preview">
+                    </div>
+                    <div class="template-detail-info">
+                        <h3 id="modalTemplateTitle">Название</h3>
+                        <p id="modalTemplateDescription">Описание шаблона</p>
+                        
+                        <div class="detail-section">
+                            <h4>Категория</h4>
+                            <div class="value" id="modalTemplateCategory">Классический</div>
+                        </div>
+                        
+                        <div class="detail-section">
+                            <h4>Подходит для</h4>
+                            <div class="value" id="modalTemplateSuitableFor">Все профессии</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">Закрыть</button>
+                <button class="btn btn-primary" onclick="useTemplate()" id="useTemplateBtn">
+                    ✨ Использовать шаблон
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/auth.js"></script>
+    <script>
+        let templates = [];
+        let filteredTemplates = [];
+        let currentFilter = 'all';
+        let selectedTemplateId = null;
+
+        // Проверка авторизации
+        const isAuth = isAuthenticated();
+        if (isAuth) {
+            document.getElementById('userMenuContainer').style.display = 'flex';
+            document.getElementById('authButtons').style.display = 'none';
+            
+            const user = getCurrentUser();
+            if (user) {
+                document.getElementById('userInitial').textContent = user.username.charAt(0).toUpperCase();
+                if (user.is_staff) {
+                    document.getElementById('adminLink').style.display = 'block';
+                }
+            }
+        } else {
+            document.getElementById('userMenuContainer').style.display = 'none';
+            document.getElementById('authButtons').style.display = 'flex';
+        }
+
+        // Загрузка шаблонов
+        async function loadTemplates() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('templatesGrid').innerHTML = '';
+            document.getElementById('emptyState').style.display = 'none';
+
+            try {
+                const data = await API.templates.list();
+                templates = data.results || data;
+                filteredTemplates = templates;
+                
+                if (templates.length === 0) {
+                    document.getElementById('emptyState').style.display = 'block';
+                } else {
+                    renderTemplates(templates);
+                    updateResultsInfo();
+                }
+            } catch (error) {
+                console.error('Error loading templates:', error);
+                document.getElementById('emptyState').style.display = 'block';
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        // Отрисовка шаблонов
+        function renderTemplates(templatesList) {
+            const grid = document.getElementById('templatesGrid');
+            grid.innerHTML = '';
+
+            templatesList.forEach((template, index) => {
+                const card = document.createElement('div');
+                card.className = 'template-card';
+                
+                const previewContent = template.preview_image 
+                    ? `<img src="${template.preview_image}" alt="${template.name}">`
+                    : `${index + 1}`;
+
+                card.innerHTML = `
+                    <div class="template-preview">
+                        ${previewContent}
+                        <div class="template-overlay">
+                            <div class="overlay-buttons">
+                                <button class="btn btn-secondary" onclick="event.stopPropagation(); openModal(${template.id})">
+                                    👁️ Просмотр
+                                </button>
+                                ${isAuth ? `<button class="btn btn-primary" onclick="event.stopPropagation(); createResumeWithTemplate(${template.id})">
+                                    ✨ Использовать
+                                </button>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="template-info">
+                        <h3>${template.name}</h3>
+                        <p>${template.description || 'Профессиональный шаблон резюме'}</p>
+                        <div class="template-meta">
+                            <span class="template-badge">Популярный</span>
+                            <span>${template.created_at ? formatDate(template.created_at) : ''}</span>
+                        </div>
+                    </div>
+                `;
+                
+                card.onclick = () => openModal(template.id);
+                grid.appendChild(card);
+            });
+        }
+
+        // Фильтрация шаблонов
+        function setFilter(filter) {
+            currentFilter = filter;
+            
+            // Обновляем активную кнопку
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Фильтруем шаблоны
+            if (filter === 'all') {
+                filteredTemplates = templates;
+            } else {
+                // В будущем можно добавить категории в модель Template
+                filteredTemplates = templates; // Пока показываем все
+            }
+
+            renderTemplates(filteredTemplates);
+            updateResultsInfo();
+        }
+
+        // Поиск шаблонов
+        function filterTemplates() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            
+            filteredTemplates = templates.filter(t => 
+                t.name.toLowerCase().includes(search) ||
+                (t.description && t.description.toLowerCase().includes(search))
+            );
+
+            renderTemplates(filteredTemplates);
+            updateResultsInfo();
+        }
+
+        // Обновление информации о результатах
+        function updateResultsInfo() {
+            const info = document.getElementById('resultsInfo');
+            const count = filteredTemplates.length;
+            const total = templates.length;
+            
+            if (count === total) {
+                info.textContent = `Найдено ${count} ${plural(count, 'шаблон', 'шаблона', 'шаблонов')}`;
+            } else {
+                info.textContent = `Показано ${count} из ${total} ${plural(total, 'шаблона', 'шаблонов', 'шаблонов')}`;
+            }
+
+            if (count === 0) {
+                document.getElementById('emptyState').style.display = 'block';
+                document.getElementById('templatesGrid').style.display = 'none';
+            } else {
+                document.getElementById('emptyState').style.display = 'none';
+                document.getElementById('templatesGrid').style.display = 'grid';
+            }
+        }
+
+        // Открыть модальное окно с деталями
+        async function openModal(templateId) {
+            selectedTemplateId = templateId;
+            
+            try {
+                const template = await API.templates.get(templateId);
+                
+                document.getElementById('modalTemplateName').textContent = template.name;
+                document.getElementById('modalTemplateTitle').textContent = template.name;
+                document.getElementById('modalTemplateDescription').textContent = template.description || 'Профессиональный шаблон резюме';
+                
+                if (template.preview_image) {
+                    document.getElementById('modalPreviewImage').src = template.preview_image;
+                    document.getElementById('modalPreviewImage').style.display = 'block';
+                } else {
+                    document.getElementById('modalPreviewImage').style.display = 'none';
+                }
+                
+                // Показываем кнопку использования только для авторизованных
+                const useBtn = document.getElementById('useTemplateBtn');
+                if (isAuth) {
+                    useBtn.style.display = 'inline-flex';
+                } else {
+                    useBtn.style.display = 'none';
+                }
+                
+                document.getElementById('templateModal').classList.add('active');
+            } catch (error) {
+                console.error('Error loading template:', error);
+            }
+        }
+
+        // Закрыть модальное окно
+        function closeModal() {
+            document.getElementById('templateModal').classList.remove('active');
+            selectedTemplateId = null;
+        }
+
+        // Создать резюме с выбранным шаблоном
+        function createResumeWithTemplate(templateId) {
+            if (!isAuth) {
+                window.location.href = '/login.html';
+                return;
+            }
+            // Перенаправляем на создание резюме с выбранным шаблоном
+            window.location.href = `/resume-editor.html?template=${templateId || selectedTemplateId}&new=true`;
+        }
+
+        // Использовать шаблон из модального окна
+        function useTemplate() {
+            if (!selectedTemplateId) return;
+            createResumeWithTemplate(selectedTemplateId);
+        }
+
+        // Вспомогательные функции
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('ru-RU');
+        }
+
+        function plural(n, one, two, five) {
+            n = Math.abs(n) % 100;
+            const n1 = n % 10;
+            if (n > 10 && n < 20) return five;
+            if (n1 > 1 && n1 < 5) return two;
+            if (n1 === 1) return one;
+            return five;
+        }
+
+        function toggleUserMenu() {
+            document.getElementById('userDropdown').classList.toggle('show');
+        }
+
+        // Закрыть меню и модальное окно при клике вне
+        window.onclick = function(event) {
+            if (!event.target.matches('.user-avatar')) {
+                const dropdown = document.getElementById('userDropdown');
+                if (dropdown && dropdown.classList.contains('show')) {
+                    dropdown.classList.remove('show');
+                }
+            }
+            
+            if (event.target.classList.contains('modal')) {
+                closeModal();
+            }
+        }
+
+        // Инициализация
+        loadTemplates();
+    </script>
+</body>
+</html>
