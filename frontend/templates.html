@@ -259,7 +259,10 @@
         .template-preview img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
+             background: #f7f7f7; /* Светлый фон вокруг, чтобы смотрелось ровно */
+            padding: 8px;        /* Чтобы не липло к краям карточки */
+            border-radius: 8px;
         }
 
         .template-overlay {
