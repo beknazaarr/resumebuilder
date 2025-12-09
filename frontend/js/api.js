@@ -1,25 +1,21 @@
 // js/api.js
 const API_BASE_URL = '/api';
 
-// Получить токен из localStorage
 function getToken() {
     return localStorage.getItem('access_token');
 }
 
-// Установить токены
 function setTokens(access, refresh) {
     localStorage.setItem('access_token', access);
     localStorage.setItem('refresh_token', refresh);
 }
 
-// Удалить токены
 function clearTokens() {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('user');
 }
 
-// Базовый fetch с обработкой токена
 async function apiRequest(endpoint, options = {}) {
     const token = getToken();
     
@@ -49,7 +45,6 @@ async function apiRequest(endpoint, options = {}) {
             }
         }
 
-        // Для DELETE запросов может не быть JSON
         if (response.status === 204) {
             return { message: 'Success' };
         }
@@ -67,18 +62,14 @@ async function apiRequest(endpoint, options = {}) {
     }
 }
 
-// Обновление токена
 async function refreshToken() {
     const refresh = localStorage.getItem('refresh_token');
-    
     if (!refresh) return false;
 
     try {
         const response = await fetch(`${API_BASE_URL}/users/token/refresh/`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ refresh })
         });
 
@@ -94,184 +85,144 @@ async function refreshToken() {
     }
 }
 
-// API методы
 const API = {
-    // Авторизация
     auth: {
         register: (data) => apiRequest('/users/register/', {
             method: 'POST',
             body: JSON.stringify(data)
         }),
-        
         login: (data) => apiRequest('/users/login/', {
             method: 'POST',
             body: JSON.stringify(data)
         }),
-        
         getProfile: () => apiRequest('/users/profile/'),
-        
         updateProfile: (data) => apiRequest('/users/profile/', {
             method: 'PATCH',
             body: JSON.stringify(data)
         }),
-        
         changePassword: (data) => apiRequest('/users/change-password/', {
             method: 'POST',
             body: JSON.stringify(data)
         })
     },
 
-    // Резюме
     resumes: {
         list: () => apiRequest('/resumes/'),
-        
         get: (id) => apiRequest(`/resumes/${id}/`),
-        
         create: (data) => apiRequest('/resumes/create/', {
             method: 'POST',
             body: JSON.stringify(data)
         }),
-        
         update: (id, data) => apiRequest(`/resumes/${id}/update/`, {
             method: 'PATCH',
             body: JSON.stringify(data)
         }),
-        
         delete: (id) => apiRequest(`/resumes/${id}/delete/`, {
             method: 'DELETE'
         }),
-        
         copy: (id) => apiRequest(`/resumes/${id}/copy/`, {
             method: 'POST'
         }),
-        
         setPrimary: (id) => apiRequest(`/resumes/${id}/set-primary/`, {
             method: 'POST'
         }),
-        
         exportPDF: (id) => {
             window.open(`${API_BASE_URL}/resumes/${id}/export/pdf/`, '_blank');
         },
-        
         exportDOCX: (id) => {
             window.open(`${API_BASE_URL}/resumes/${id}/export/docx/`, '_blank');
         }
     },
 
-    // Личная информация
     personalInfo: {
         get: (resumeId) => apiRequest(`/resume/${resumeId}/personal-info/`),
-        
         createOrUpdate: (resumeId, data) => apiRequest(`/resume/${resumeId}/personal-info/`, {
             method: 'POST',
             body: JSON.stringify(data)
         }),
-        
         update: (resumeId, data) => apiRequest(`/resume/${resumeId}/personal-info/`, {
             method: 'PATCH',
             body: JSON.stringify(data)
         })
     },
 
-    // Образование
     education: {
         list: (resumeId) => apiRequest(`/resumes/${resumeId}/education/`),
-        
         create: (resumeId, data) => apiRequest(`/resumes/${resumeId}/education/`, {
             method: 'POST',
             body: JSON.stringify(data)
         }),
-        
         update: (resumeId, id, data) => apiRequest(`/resumes/${resumeId}/education/${id}/`, {
             method: 'PATCH',
             body: JSON.stringify(data)
         }),
-        
         delete: (resumeId, id) => apiRequest(`/resumes/${resumeId}/education/${id}/`, {
             method: 'DELETE'
         })
     },
 
-    // Опыт работы
     workExperience: {
         list: (resumeId) => apiRequest(`/resumes/${resumeId}/work-experience/`),
-        
         create: (resumeId, data) => apiRequest(`/resumes/${resumeId}/work-experience/`, {
             method: 'POST',
             body: JSON.stringify(data)
         }),
-        
         update: (resumeId, id, data) => apiRequest(`/resumes/${resumeId}/work-experience/${id}/`, {
             method: 'PATCH',
             body: JSON.stringify(data)
         }),
-        
         delete: (resumeId, id) => apiRequest(`/resumes/${resumeId}/work-experience/${id}/`, {
             method: 'DELETE'
         })
     },
 
-    // Навыки
     skills: {
         list: (resumeId) => apiRequest(`/resumes/${resumeId}/skills/`),
-        
         create: (resumeId, data) => apiRequest(`/resumes/${resumeId}/skills/`, {
             method: 'POST',
             body: JSON.stringify(data)
         }),
-        
         update: (resumeId, id, data) => apiRequest(`/resumes/${resumeId}/skills/${id}/`, {
             method: 'PATCH',
             body: JSON.stringify(data)
         }),
-        
         delete: (resumeId, id) => apiRequest(`/resumes/${resumeId}/skills/${id}/`, {
             method: 'DELETE'
         })
     },
 
-    // Достижения
     achievements: {
         list: (resumeId) => apiRequest(`/resumes/${resumeId}/achievements/`),
-        
         create: (resumeId, data) => apiRequest(`/resumes/${resumeId}/achievements/`, {
             method: 'POST',
             body: JSON.stringify(data)
         }),
-        
         update: (resumeId, id, data) => apiRequest(`/resumes/${resumeId}/achievements/${id}/`, {
             method: 'PATCH',
             body: JSON.stringify(data)
         }),
-        
         delete: (resumeId, id) => apiRequest(`/resumes/${resumeId}/achievements/${id}/`, {
             method: 'DELETE'
         })
     },
 
-    // Языки
     languages: {
         list: (resumeId) => apiRequest(`/resumes/${resumeId}/languages/`),
-        
         create: (resumeId, data) => apiRequest(`/resumes/${resumeId}/languages/`, {
             method: 'POST',
             body: JSON.stringify(data)
         }),
-        
         update: (resumeId, id, data) => apiRequest(`/resumes/${resumeId}/languages/${id}/`, {
             method: 'PATCH',
             body: JSON.stringify(data)
         }),
-        
         delete: (resumeId, id) => apiRequest(`/resumes/${resumeId}/languages/${id}/`, {
             method: 'DELETE'
         })
     },
 
-    // Шаблоны
     templates: {
         list: () => apiRequest('/templates/'),
-        
         get: (id) => apiRequest(`/templates/${id}/`)
     }
 };

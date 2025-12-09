@@ -1126,6 +1126,463 @@ function formatDate(dateString) {
         }
         // Инициализация редактора резюме
         init();
+        // ============= ФУНКЦИИ СОХРАНЕНИЯ =============
+
+// Сохранение личной информации
+async function savePersonalInfo(e) {
+    e.preventDefault();
+    
+    const data = {
+        full_name: document.getElementById('fullName').value,
+        phone: document.getElementById('phone').value,
+        email: document.getElementById('email').value,
+        address: document.getElementById('address').value,
+        linkedin: document.getElementById('linkedin').value,
+        website: document.getElementById('website').value,
+        summary: document.getElementById('summary').value
+    };
+
+    try {
+        await API.personalInfo.createOrUpdate(resumeId, data);
+        showAlert('alertPersonal', 'Личная информация сохранена!', 'success');
+        await refreshPreview();
+    } catch (error) {
+        console.error('Error saving personal info:', error);
+        showAlert('alertPersonal', 'Ошибка сохранения', 'error');
+    }
+}
+
+// Переключение секций
+function switchSection(section) {
+    // Скрываем все секции
+    document.querySelectorAll('.section-content').forEach(s => {
+        s.classList.remove('active');
+    });
+    
+    // Убираем активность у всех кнопок
+    document.querySelectorAll('.section-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Показываем выбранную секцию
+    document.getElementById(section + 'Section').classList.add('active');
+    
+    // Активируем соответствующую кнопку
+    event.target.classList.add('active');
+    
+    currentSection = section;
+}
+
+// Показать alert
+function showAlert(elementId, message, type) {
+    const alert = document.getElementById(elementId);
+    alert.className = `alert alert-${type} show`;
+    alert.textContent = message;
+    
+    setTimeout(() => {
+        alert.classList.remove('show');
+    }, 3000);
+}
+
+// ============= ОПЫТ РАБОТЫ =============
+
+function openExperienceModal(id = null) {
+    currentEditId = id;
+    const modal = document.getElementById('experienceModal');
+    const title = document.getElementById('experienceModalTitle');
+    
+    if (id) {
+        title.textContent = 'Редактировать опыт работы';
+        // Загрузить данные для редактирования
+        loadExperienceForEdit(id);
+    } else {
+        title.textContent = 'Добавить опыт работы';
+        document.getElementById('experienceForm').reset();
+    }
+    
+    modal.classList.add('active');
+}
+
+function closeExperienceModal() {
+    document.getElementById('experienceModal').classList.remove('active');
+    document.getElementById('experienceForm').reset();
+    currentEditId = null;
+}
+
+async function saveExperience(e) {
+    e.preventDefault();
+    
+    const data = {
+        company: document.getElementById('expCompany').value,
+        position: document.getElementById('expPosition').value,
+        start_date: document.getElementById('expStartDate').value,
+        end_date: document.getElementById('expEndDate').value || null,
+        is_current: document.getElementById('expIsCurrent').checked,
+        description: document.getElementById('expDescription').value
+    };
+
+    try {
+        if (currentEditId) {
+            await API.workExperience.update(resumeId, currentEditId, data);
+        } else {
+            await API.workExperience.create(resumeId, data);
+        }
+        
+        closeExperienceModal();
+        await loadExperience();
+        await refreshPreview();
+        showAlert('alertExperience', 'Опыт работы сохранён!', 'success');
+    } catch (error) {
+        console.error('Error saving experience:', error);
+        alert('Ошибка сохранения опыта работы');
+    }
+}
+
+async function deleteExperience(id) {
+    if (!confirm('Удалить этот опыт работы?')) return;
+    
+    try {
+        await API.workExperience.delete(resumeId, id);
+        await loadExperience();
+        await refreshPreview();
+        showAlert('alertExperience', 'Опыт работы удалён', 'success');
+    } catch (error) {
+        console.error('Error deleting experience:', error);
+    }
+}
+
+function toggleEndDate(prefix) {
+    const checkbox = document.getElementById(prefix + 'IsCurrent');
+    const endDate = document.getElementById(prefix + 'EndDate');
+    endDate.disabled = checkbox.checked;
+    if (checkbox.checked) {
+        endDate.value = '';
+    }
+}
+
+// ============= ОБРАЗОВАНИЕ =============
+
+function openEducationModal(id = null) {
+    currentEditId = id;
+    const modal = document.getElementById('educationModal');
+    const title = document.getElementById('educationModalTitle');
+    
+    if (id) {
+        title.textContent = 'Редактировать образование';
+    } else {
+        title.textContent = 'Добавить образование';
+        document.getElementById('educationForm').reset();
+    }
+    
+    modal.classList.add('active');
+}
+
+function closeEducationModal() {
+    document.getElementById('educationModal').classList.remove('active');
+    document.getElementById('educationForm').reset();
+    currentEditId = null;
+}
+
+async function saveEducation(e) {
+    e.preventDefault();
+    
+    const data = {
+        institution: document.getElementById('eduInstitution').value,
+        degree: document.getElementById('eduDegree').value,
+        field_of_study: document.getElementById('eduField').value,
+        start_date: document.getElementById('eduStartDate').value,
+        end_date: document.getElementById('eduEndDate').value || null,
+        description: document.getElementById('eduDescription').value
+    };
+
+    try {
+        if (currentEditId) {
+            await API.education.update(resumeId, currentEditId, data);
+        } else {
+            await API.education.create(resumeId, data);
+        }
+        
+        closeEducationModal();
+        await loadEducation();
+        await refreshPreview();
+        showAlert('alertEducation', 'Образование сохранено!', 'success');
+    } catch (error) {
+        console.error('Error saving education:', error);
+        alert('Ошибка сохранения образования');
+    }
+}
+
+function createEducationCard(item) {
+    const card = document.createElement('div');
+    card.className = 'item-card';
+    
+    card.innerHTML = `
+        <h4>${item.institution}</h4>
+        <p><strong>${item.degree}</strong> - ${item.field_of_study}</p>
+        <p>${formatDate(item.start_date)} - ${item.end_date ? formatDate(item.end_date) : 'настоящее время'}</p>
+        ${item.description ? `<p>${item.description.substring(0, 100)}${item.description.length > 100 ? '...' : ''}</p>` : ''}
+        <div class="item-actions">
+            <button class="btn btn-small btn-secondary" onclick="openEducationModal(${item.id})">✏️ Редактировать</button>
+            <button class="btn btn-small btn-secondary" onclick="deleteEducation(${item.id})">🗑️ Удалить</button>
+        </div>
+    `;
+    
+    return card;
+}
+
+async function deleteEducation(id) {
+    if (!confirm('Удалить это образование?')) return;
+    
+    try {
+        await API.education.delete(resumeId, id);
+        await loadEducation();
+        await refreshPreview();
+        showAlert('alertEducation', 'Образование удалено', 'success');
+    } catch (error) {
+        console.error('Error deleting education:', error);
+    }
+}
+
+// ============= НАВЫКИ =============
+
+function openSkillModal(id = null) {
+    currentEditId = id;
+    const modal = document.getElementById('skillModal');
+    const title = document.getElementById('skillModalTitle');
+    
+    if (id) {
+        title.textContent = 'Редактировать навык';
+    } else {
+        title.textContent = 'Добавить навык';
+        document.getElementById('skillForm').reset();
+    }
+    
+    modal.classList.add('active');
+}
+
+function closeSkillModal() {
+    document.getElementById('skillModal').classList.remove('active');
+    document.getElementById('skillForm').reset();
+    currentEditId = null;
+}
+
+async function saveSkill(e) {
+    e.preventDefault();
+    
+    const data = {
+        name: document.getElementById('skillName').value,
+        level: document.getElementById('skillLevel').value,
+        category: document.getElementById('skillCategory').value
+    };
+
+    try {
+        if (currentEditId) {
+            await API.skills.update(resumeId, currentEditId, data);
+        } else {
+            await API.skills.create(resumeId, data);
+        }
+        
+        closeSkillModal();
+        await loadSkills();
+        await refreshPreview();
+        showAlert('alertSkills', 'Навык сохранён!', 'success');
+    } catch (error) {
+        console.error('Error saving skill:', error);
+        alert('Ошибка сохранения навыка');
+    }
+}
+
+function createSkillCard(item) {
+    const card = document.createElement('div');
+    card.className = 'item-card';
+    
+    card.innerHTML = `
+        <h4>${item.name}</h4>
+        <p><strong>Уровень:</strong> ${item.level_display || item.level}</p>
+        <p><strong>Категория:</strong> ${item.category_display || item.category}</p>
+        <div class="item-actions">
+            <button class="btn btn-small btn-secondary" onclick="openSkillModal(${item.id})">✏️ Редактировать</button>
+            <button class="btn btn-small btn-secondary" onclick="deleteSkill(${item.id})">🗑️ Удалить</button>
+        </div>
+    `;
+    
+    return card;
+}
+
+async function deleteSkill(id) {
+    if (!confirm('Удалить этот навык?')) return;
+    
+    try {
+        await API.skills.delete(resumeId, id);
+        await loadSkills();
+        await refreshPreview();
+        showAlert('alertSkills', 'Навык удалён', 'success');
+    } catch (error) {
+        console.error('Error deleting skill:', error);
+    }
+}
+
+// ============= ДОСТИЖЕНИЯ =============
+
+function openAchievementModal(id = null) {
+    currentEditId = id;
+    const modal = document.getElementById('achievementModal');
+    const title = document.getElementById('achievementModalTitle');
+    
+    if (id) {
+        title.textContent = 'Редактировать достижение';
+    } else {
+        title.textContent = 'Добавить достижение';
+        document.getElementById('achievementForm').reset();
+    }
+    
+    modal.classList.add('active');
+}
+
+function closeAchievementModal() {
+    document.getElementById('achievementModal').classList.remove('active');
+    document.getElementById('achievementForm').reset();
+    currentEditId = null;
+}
+
+async function saveAchievement(e) {
+    e.preventDefault();
+    
+    const data = {
+        title: document.getElementById('achievementTitle').value,
+        date: document.getElementById('achievementDate').value || null,
+        description: document.getElementById('achievementDescription').value
+    };
+
+    try {
+        if (currentEditId) {
+            await API.achievements.update(resumeId, currentEditId, data);
+        } else {
+            await API.achievements.create(resumeId, data);
+        }
+        
+        closeAchievementModal();
+        await loadAchievements();
+        await refreshPreview();
+        showAlert('alertAchievements', 'Достижение сохранено!', 'success');
+    } catch (error) {
+        console.error('Error saving achievement:', error);
+        alert('Ошибка сохранения достижения');
+    }
+}
+
+async function deleteAchievement(id) {
+    if (!confirm('Удалить это достижение?')) return;
+    
+    try {
+        await API.achievements.delete(resumeId, id);
+        await loadAchievements();
+        await refreshPreview();
+        showAlert('alertAchievements', 'Достижение удалено', 'success');
+    } catch (error) {
+        console.error('Error deleting achievement:', error);
+    }
+}
+
+// ============= ЯЗЫКИ =============
+
+function openLanguageModal(id = null) {
+    currentEditId = id;
+    const modal = document.getElementById('languageModal');
+    const title = document.getElementById('languageModalTitle');
+    
+    if (id) {
+        title.textContent = 'Редактировать язык';
+    } else {
+        title.textContent = 'Добавить язык';
+        document.getElementById('languageForm').reset();
+    }
+    
+    modal.classList.add('active');
+}
+
+function closeLanguageModal() {
+    document.getElementById('languageModal').classList.remove('active');
+    document.getElementById('languageForm').reset();
+    currentEditId = null;
+}
+
+async function saveLanguage(e) {
+    e.preventDefault();
+    
+    const data = {
+        language: document.getElementById('languageName').value,
+        proficiency_level: document.getElementById('languageLevel').value
+    };
+
+    try {
+        if (currentEditId) {
+            await API.languages.update(resumeId, currentEditId, data);
+        } else {
+            await API.languages.create(resumeId, data);
+        }
+        
+        closeLanguageModal();
+        await loadLanguages();
+        await refreshPreview();
+        showAlert('alertLanguages', 'Язык сохранён!', 'success');
+    } catch (error) {
+        console.error('Error saving language:', error);
+        alert('Ошибка сохранения языка');
+    }
+}
+
+async function deleteLanguage(id) {
+    if (!confirm('Удалить этот язык?')) return;
+    
+    try {
+        await API.languages.delete(resumeId, id);
+        await loadLanguages();
+        await refreshPreview();
+        showAlert('alertLanguages', 'Язык удалён', 'success');
+    } catch (error) {
+        console.error('Error deleting language:', error);
+    }
+}
+
+// ============= ДОПОЛНИТЕЛЬНЫЕ ФУНКЦИИ =============
+
+function saveResume() {
+    showAlert('alertPersonal', 'Все данные сохраняются автоматически', 'success');
+}
+
+function exportPDF() {
+    API.resumes.exportPDF(resumeId);
+}
+
+function changeTemplate() {
+    const templateId = document.getElementById('templateSelect').value;
+    // В будущем здесь будет логика смены шаблона
+    console.log('Template changed to:', templateId);
+}
+
+function zoomIn() {
+    zoomScale = Math.min(zoomScale + 0.1, 1.5);
+    updateZoom();
+}
+
+function zoomOut() {
+    zoomScale = Math.max(zoomScale - 0.1, 0.5);
+    updateZoom();
+}
+
+function updateZoom() {
+    const wrapper = document.getElementById('previewWrapper');
+    wrapper.style.transform = `scale(${zoomScale})`;
+    document.getElementById('zoomLevel').textContent = `${Math.round(zoomScale * 100)}%`;
+}
+
+// Закрытие модальных окон при клике вне их
+window.onclick = function(event) {
+    if (event.target.classList.contains('modal')) {
+        event.target.classList.remove('active');
+    }
+}
     </script>
 </body>
 </html>
