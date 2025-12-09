@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактор резюме - Resume Builder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        header {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #2563eb;
+            border: 2px solid #2563eb;
+        }
+
+        .btn-secondary:hover {
+            background: #eff6ff;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        /* Editor Layout */
+        .editor-container {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            max-width: 1800px;
+            margin: 0 auto;
+            height: calc(100vh - 80px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: white;
+            overflow-y: auto;
+            border-right: 1px solid #e2e8f0;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 10;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .template-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .template-selector:hover {
+            background: #f1f5f9;
+        }
+
+        .template-selector select {
+            flex: 1;
+            padding: 0.5rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .sections-nav {
+            padding: 1rem 0;
+        }
+
+        .section-btn {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.95rem;
+            color: #334155;
+            font-weight: 500;
+        }
+
+        .section-btn:hover {
+            background: #f8fafc;
+        }
+
+        .section-btn.active {
+            background: #eff6ff;
+            color: #2563eb;
+            border-left: 3px solid #2563eb;
+        }
+
+        .section-content {
+            padding: 1.5rem;
+            display: none;
+        }
+
+        .section-content.active {
+            display: block;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #334155;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+        }
+
+        /* Items List */
+        .items-list {
+            margin-top: 1rem;
+        }
+
+        .item-card {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+        }
+
+        .item-card:hover {
+            border-color: #2563eb;
+        }
+
+        .item-card h4 {
+            margin-bottom: 0.5rem;
+            color: #1e293b;
+        }
+
+        .item-card p {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin: 0.25rem 0;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .btn-small {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+        }
+
+        .btn-icon {
+            padding: 0.5rem;
+            background: none;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .btn-icon:hover {
+            background: #f1f5f9;
+            color: #2563eb;
+        }
+
+        .add-item-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: #eff6ff;
+            border: 2px dashed #2563eb;
+            color: #2563eb;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .add-item-btn:hover {
+            background: #dbeafe;
+        }
+
+        /* Preview Panel */
+        .preview-panel {
+            background: #e2e8f0;
+            overflow-y: auto;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .preview-controls {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .zoom-controls {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .zoom-btn {
+            padding: 0.5rem 1rem;
+            background: white;
+            border: 2px solid #cbd5e1;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .zoom-btn:hover {
+            border-color: #2563eb;
+        }
+
+        .preview-wrapper {
+            width: 100%;
+            max-width: 900px;
+            background: white;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            transition: transform 0.3s;
+        }
+
+        .preview-content {
+            padding: 40px;
+            min-height: 1100px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h3 {
+            font-size: 1.3rem;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #64748b;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #2563eb;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #64748b;
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 1200px) {
+            .editor-container {
+                grid-template-columns: 350px 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .editor-container {
+                grid-template-columns: 1fr;
+            }
+
+            .preview-panel {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav>
+            <a href="/dashboard.html" class="logo">← Resume Builder</a>
+            <div class="nav-actions">
+                <button class="btn btn-secondary" onclick="saveResume()">💾 Сохранить</button>
+                <button class="btn btn-success" onclick="exportPDF()">📥 Скачать PDF</button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Editor Container -->
+    <div class="editor-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2 id="resumeTitle">Редактирование резюме</h2>
+                <div class="template-selector">
+                    <label>Шаблон:</label>
+                    <select id="templateSelect" onchange="changeTemplate()">
+                        <option value="">Загрузка...</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="sections-nav">
+                <button class="section-btn active" onclick="switchSection('personal')">
+                    👤 Личная информация
+                    <span>→</span>
+                </button>
+                <button class="section-btn" onclick="switchSection('experience')">
+                    💼 Опыт работы
+                    <span id="experienceCount">0</span>
+                </button>
+                <button class="section-btn" onclick="switchSection('education')">
+                    🎓 Образование
+                    <span id="educationCount">0</span>
+                </button>
+                <button class="section-btn" onclick="switchSection('skills')">
+                    ⚡ Навыки
+                    <span id="skillsCount">0</span>
+                </button>
+                <button class="section-btn" onclick="switchSection('achievements')">
+                    🏆 Достижения
+                    <span id="achievementsCount">0</span>
+                </button>
+                <button class="section-btn" onclick="switchSection('languages')">
+                    🌍 Языки
+                    <span id="languagesCount">0</span>
+                </button>
+            </div>
+
+            <!-- Personal Info Section -->
+            <div id="personalSection" class="section-content active">
+                <h3>Личная информация</h3>
+                <div id="alertPersonal" class="alert"></div>
+                
+                <form id="personalInfoForm">
+                    <div class="form-group">
+                        <label>ФИО *</label>
+                        <input type="text" id="fullName" required placeholder="Иван Иванов">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Телефон</label>
+                            <input type="tel" id="phone" placeholder="+996 XXX XXX XXX">
+                        </div>
+                        <div class="form-group">
+                            <label>Email *</label>
+                            <input type="email" id="email" required placeholder="example@mail.com">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Адрес</label>
+                        <input type="text" id="address" placeholder="Город, Страна">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>LinkedIn</label>
+                            <input type="url" id="linkedin" placeholder="https://linkedin.com/in/...">
+                        </div>
+                        <div class="form-group">
+                            <label>Веб-сайт</label>
+                            <input type="url" id="website" placeholder="https://...">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>О себе</label>
+                        <textarea id="summary" placeholder="Расскажите о себе, своём опыте и целях..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        Сохранить личную информацию
+                    </button>
+                </form>
+            </div>
+
+            <!-- Experience Section -->
+            <div id="experienceSection" class="section-content">
+                <h3>Опыт работы</h3>
+                <div id="alertExperience" class="alert"></div>
+                <div id="experienceList" class="items-list"></div>
+                <button class="add-item-btn" onclick="openExperienceModal()">
+                    ➕ Добавить опыт работы
+                </button>
+            </div>
+
+            <!-- Education Section -->
+            <div id="educationSection" class="section-content">
+                <h3>Образование</h3>
+                <div id="alertEducation" class="alert"></div>
+                <div id="educationList" class="items-list"></div>
+                <button class="add-item-btn" onclick="openEducationModal()">
+                    ➕ Добавить образование
+                </button>
+            </div>
+
+            <!-- Skills Section -->
+            <div id="skillsSection" class="section-content">
+                <h3>Навыки</h3>
+                <div id="alertSkills" class="alert"></div>
+                <div id="skillsList" class="items-list"></div>
+                <button class="add-item-btn" onclick="openSkillModal()">
+                    ➕ Добавить навык
+                </button>
+            </div>
+
+            <!-- Achievements Section -->
+            <div id="achievementsSection" class="section-content">
+                <h3>Достижения</h3>
+                <div id="alertAchievements" class="alert"></div>
+                <div id="achievementsList" class="items-list"></div>
+                <button class="add-item-btn" onclick="openAchievementModal()">
+                    ➕ Добавить достижение
+                </button>
+            </div>
+
+            <!-- Languages Section -->
+            <div id="languagesSection" class="section-content">
+                <h3>Языки</h3>
+                <div id="alertLanguages" class="alert"></div>
+                <div id="languagesList" class="items-list"></div>
+                <button class="add-item-btn" onclick="openLanguageModal()">
+                    ➕ Добавить язык
+                </button>
+            </div>
+        </div>
+
+        <!-- Preview Panel -->
+        <div class="preview-panel">
+            <div class="preview-controls">
+                <div class="zoom-controls">
+                    <button class="zoom-btn" onclick="zoomOut()">−</button>
+                    <span id="zoomLevel">100%</span>
+                    <button class="zoom-btn" onclick="zoomIn()">+</button>
+                </div>
+                <button class="btn btn-secondary" onclick="refreshPreview()">🔄 Обновить</button>
+            </div>
+            <div class="preview-wrapper" id="previewWrapper">
+                <div class="preview-content" id="previewContent">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Загрузка предпросмотра...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Work Experience Modal -->
+    <div class="modal" id="experienceModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="experienceModalTitle">Добавить опыт работы</h3>
+                <button class="close-btn" onclick="closeExperienceModal()">&times;</button>
+            </div>
+            <form id="experienceForm">
+                <div class="form-group">
+                    <label>Компания *</label>
+                    <input type="text" id="expCompany" required>
+                </div>
+                <div class="form-group">
+                    <label>Должность *</label>
+                    <input type="text" id="expPosition" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Дата начала *</label>
+                        <input type="date" id="expStartDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Дата окончания</label>
+                        <input type="date" id="expEndDate">
+                    </div>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="expIsCurrent" onchange="toggleEndDate('exp')">
+                    <label>Я работаю здесь сейчас</label>
+                </div>
+                <div class="form-group">
+                    <label>Описание обязанностей</label>
+                    <textarea id="expDescription" placeholder="Опишите ваши обязанности и достижения..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    Сохранить
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Education Modal -->
+    <div class="modal" id="educationModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="educationModalTitle">Добавить образование</h3>
+                <button class="close-btn" onclick="closeEducationModal()">&times;</button>
+            </div>
+            <form id="educationForm">
+                <div class="form-group">
+                    <label>Учебное заведение *</label>
+                    <input type="text" id="eduInstitution" required>
+                </div>
+                <div class="form-group">
+                    <label>Степень/Квалификация *</label>
+                    <input type="text" id="eduDegree" required placeholder="Бакалавр, Магистр...">
+                </div>
+                <div class="form-group">
+                    <label>Специальность *</label>
+                    <input type="text" id="eduField" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Дата начала *</label>
+                        <input type="date" id="eduStartDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Дата окончания</label>
+                        <input type="date" id="eduEndDate">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Описание</label>
+                    <textarea id="eduDescription" placeholder="Дополнительная информация..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    Сохранить
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Skill Modal -->
+    <div class="modal" id="skillModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="skillModalTitle">Добавить навык</h3>
+                <button class="close-btn" onclick="closeSkillModal()">&times;</button>
+            </div>
+            <form id="skillForm">
+                <div class="form-group">
+                    <label>Название навыка *</label>
+                    <input type="text" id="skillName" required placeholder="JavaScript, Photoshop...">
+                </div>
+                <div class="form-group">
+                    <label>Уровень владения *</label>
+                    <select id="skillLevel" required>
+                        <option value="beginner">Начальный</option>
+                        <option value="intermediate">Средний</option>
+                        <option value="advanced">Продвинутый</option>
+                        <option value="expert">Эксперт</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Категория</label>
+                    <select id="skillCategory">
+                        <option value="technical">Технические</option>
+                        <option value="soft">Гибкие навыки</option>
+                        <option value="language">Языки</option>
+                        <option value="other">Другое</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    Сохранить
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Achievement Modal -->
+    <div class="modal" id="achievementModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="achievementModalTitle">Добавить достижение</h3>
+                <button class="close-btn" onclick="closeAchievementModal()">&times;</button>
+            </div>
+            <form id="achievementForm">
+                <div class="form-group">
+                    <label>Название достижения *</label>
+                    <input type="text" id="achievementTitle" required>
+                </div>
+                <div class="form-group">
+                    <label>Дата получения</label>
+                    <input type="date" id="achievementDate">
+                </div>
+                <div class="form-group">
+                    <label>Описание</label>
+                    <textarea id="achievementDescription"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    Сохранить
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Language Modal -->
+    <div class="modal" id="languageModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="languageModalTitle">Добавить язык</h3>
+                <button class="close-btn" onclick="closeLanguageModal()">&times;</button>
+            </div>
+            <form id="languageForm">
+                <div class="form-group">
+                    <label>Язык *</label>
+                    <input type="text" id="languageName" required placeholder="Русский, Английский...">
+                </div>
+                <div class="form-group">
+                    <label>Уровень владения *</label>
+                    <select id="languageLevel" required>
+                        <option value="A1">A1 - Начальный</option>
+                        <option value="A2">A2 - Элементарный</option>
+                        <option value="B1">B1 - Средний</option>
+                        <option value="B2">B2 - Выше среднего</option>
+                        <option value="C1">C1 - Продвинутый</option>
+                        <option value="C2">C2 - Владение в совершенстве</option>
+                        <option value="native">Родной</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    Сохранить
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/auth.js"></script>
+    <script>
+        requireAuth();
+
+        let resumeId = null;
+        let resumeData = null;
+        let currentEditId = null;
+        let currentSection = 'personal';
+        let zoomScale = 1;
+
+        // Получить ID резюме из URL
+        const urlParams = new URLSearchParams(window.location.search);
+        resumeId = urlParams.get('id');
+
+        if (!resumeId) {
+            alert('ID резюме не указан');
+            window.location.href = '/dashboard.html';
+        }
+
+        // Инициализация
+        async function init() {
+            await loadTemplates();
+            await loadResume();
+            await loadAllData();
+            setupEventListeners();
+        }
+
+        // Загрузка шаблонов
+        async function loadTemplates() {
+            try {
+                const data = await API.templates.list();
+                const templates = data.results || data;
+                
+                const select = document.getElementById('templateSelect');
+                select.innerHTML = '';
+                
+                templates.forEach(template => {
+                    const option = document.createElement('option');
+                    option.value = template.id;
+                    option.textContent = template.name;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading templates:', error);
+            }
+        }
+
+        // Загрузка резюме
+        async function loadResume() {
+            try {
+                resumeData = await API.resumes.get(resumeId);
+                document.getElementById('resumeTitle').textContent = resumeData.title;
+                
+                if (resumeData.template_id) {
+                    document.getElementById('templateSelect').value = resumeData.template_id;
+                }
+            } catch (error) {
+                console.error('Error loading resume:', error);
+                alert('Ошибка загрузки резюме');
+                window.location.href = '/dashboard.html';
+            }
+        }
+
+        // Загрузка всех данных
+        async function loadAllData() {
+            await Promise.all([
+                loadPersonalInfo(),
+                loadExperience(),
+                loadEducation(),
+                loadSkills(),
+                loadAchievements(),
+                loadLanguages()
+            ]);
+            await refreshPreview();
+        }
+
+        // Загрузка личной информации
+        async function loadPersonalInfo() {
+            try {
+                const data = await API.personalInfo.get(resumeId);
+                if (data) {
+                    document.getElementById('fullName').value = data.full_name || '';
+                    document.getElementById('phone').value = data.phone || '';
+                    document.getElementById('email').value = data.email || '';
+                    document.getElementById('address').value = data.address || '';
+                    document.getElementById('linkedin').value = data.linkedin || '';
+                    document.getElementById('website').value = data.website || '';
+                    document.getElementById('summary').value = data.summary || '';
+                }
+            } catch (error) {
+                console.log('Personal info not yet added');
+            }
+        }
+        // Загрузка опыта работы
+        async function loadExperience() {
+            try {
+                const data = await API.experience.list(resumeId);
+                const list = document.getElementById('experience        List');
+                list.innerHTML = '';
+                data.forEach(item => {
+                    const card = createExperienceCard(item);
+                    list.appendChild(card);
+                });
+                document.getElementById('experienceCount').textContent = data.length;
+            } catch (error) {
+                console.error('Error loading experience:', error);
+            }
+        }  
+        // Загрузка образования
+        async function loadEducation() {
+            try {
+                const data = await API.education.list(resumeId);
+                const list = document.getElementById('educationList');
+                list.innerHTML = '';
+                data.forEach(item => {
+                    const card = createEducationCard(item);
+                    list.appendChild(card);
+                });
+                document.getElementById('educationCount').textContent = data.length;
+            } catch (error) {
+                console.error('Error loading education:', error);
+            }
+        }
+        // Загрузка навыков
+        async function loadSkills() {
+            try {
+                const data = await API.skills.list(resumeId);
+                const list = document.getElementById('skillsList');
+                list.innerHTML = '';
+                data.forEach(item => {
+                    const card = createSkillCard(item);
+                    list.appendChild(card);
+                });
+                document.getElementById('skillsCount').textContent = data.length;
+            } catch (error) {
+                console.error('Error loading skills:', error);
+            }
+        }
+        // Загрузка достижений
+        async function loadAchievements() {
+            try {
+                const data = await API.achievements.list(resumeId);
+                const list = document.getElementById('achievementsList');
+                list.innerHTML = '';
+                data.forEach(item => {
+                    const card = createAchievementCard(item);
+                    list.appendChild(card);
+                });
+                document.getElementById('achievementsCount').textContent = data.length;
+            } catch (error) {
+                console.error('Error loading achievements:', error);
+            }
+        }
+        // Загрузка языков
+        async function loadLanguages() {
+            try {
+                const data = await API.languages.list(resumeId);
+                const list = document.getElementById('languagesList');
+                list.innerHTML = '';
+                data.forEach(item => {
+                    const card = createLanguageCard(item);
+                    list.appendChild(card);
+                });
+                document.getElementById('languagesCount').textContent = data.length;
+            } catch (error) {
+                console.error('Error loading languages:', error);
+            }
+        }
+        // Установка обработчиков событий
+        function setupEventListeners() {
+            document.getElementById('personalInfoForm').addEventListener('submit', savePersonalInfo);
+            document.getElementById('experienceForm').addEventListener('submit', saveExperience);
+            document.getElementById('educationForm').addEventListener('submit', saveEducation);
+            document.getElementById('skillForm').addEventListener('submit', saveSkill);
+            document.getElementById('achievementForm').addEventListener('submit', saveAchievement);
+            document.getElementById('languageForm').addEventListener('submit', saveLanguage);
+        }
+        // Инициализация редактора резюме
+        init();
+    </script>
+</body>
+</html>
+    <style>
+        /* Reset and Base Styles */
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+        header {
+            background: #2563eb;
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+        }
+        .nav-actions button {
+            margin-left: 1rem;
+        }
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #1e40af;
+        }
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+        .btn-secondary:hover {
+            background: #cbd5e1;
+        }
+        .btn-success {
+            background: #16a34a;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #15803d;
+        }
+        /* Editor Layout */
+        .editor-container {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            height: calc(100vh - 64px);
+        }
+        .sidebar {
+            background: white;
+            border-right: 2px solid #e2e8f0;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .sidebar-header h2 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.25rem;
+        }
+        .template-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .template-selector label {
+            font-size: 0.9rem;
+            color: #475569;
+        }
+        .template-selector select {
+            padding: 0.4rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        .sections-nav {
+            display: flex;
+            flex-direction: column;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .section-btn {
+            background: none;
+            border: none;
+            text-align: left;
+            padding: 1rem 1.5rem;
+            font-size: 1rem;
+            color: #475569;
+            cursor: pointer;
+            border-left: 4px solid transparent;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }
+        .section-btn:hover {
+            background: #f1f5f9;
+        }
+        .section-btn.active {
+            border-left-color: #2563eb;
+            background: #e0e7ff;
+            color: #1e293b;
+            font-weight: 600;
+        }
+        .section-btn span {
+            background: #2563eb;
+            color: white;
+            border-radius: 12px;
+            padding: 0.1rem 0.5rem;
+            font-size: 0.75rem;
+        }
+        .section-content {
+            flex: 1;
+            padding: 1.5rem;
+            display: none;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        .section-content.active {
+            display: flex;
+        }
+        .section-content h3 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            color: #1e293b;
+        }
