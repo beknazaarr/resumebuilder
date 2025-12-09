@@ -923,20 +923,50 @@
             }
         }
         // Загрузка опыта работы
-        async function loadExperience() {
-            try {
-                const data = await API.experience.list(resumeId);
-                const list = document.getElementById('experience        List');
-                list.innerHTML = '';
-                data.forEach(item => {
-                    const card = createExperienceCard(item);
-                    list.appendChild(card);
-                });
-                document.getElementById('experienceCount').textContent = data.length;
-            } catch (error) {
-                console.error('Error loading experience:', error);
-            }
-        }  
+        // Загрузка опыта работы
+async function loadExperience() {
+    try {
+        const data = await API.workExperience.list(resumeId);
+        const list = document.getElementById('experienceList');
+        list.innerHTML = '';
+        
+        if (data && data.length > 0) {
+            data.forEach(item => {
+                const card = createExperienceCard(item);
+                list.appendChild(card);
+            });
+        } else {
+            list.innerHTML = '<p class="empty-state">Опыт работы еще не добавлен</p>';
+        }
+        
+        document.getElementById('experienceCount').textContent = data ? data.length : 0;
+    } catch (error) {
+        console.error('Error loading experience:', error);
+        document.getElementById('experienceList').innerHTML = '<p class="empty-state">Опыт работы еще не добавлен</p>';
+        document.getElementById('experienceCount').textContent = '0';
+    }
+}
+
+// Создание карточки опыта работы
+function createExperienceCard(item) {
+    const card = document.createElement('div');
+    card.className = 'item-card';
+    
+    const endDate = item.is_current ? 'настоящее время' : (item.end_date || '-');
+    
+    card.innerHTML = `
+        <h4>${item.position}</h4>
+        <p><strong>${item.company}</strong></p>
+        <p>${formatDate(item.start_date)} - ${item.is_current ? 'настоящее время' : formatDate(item.end_date)}</p>
+        ${item.description ? `<p>${item.description.substring(0, 100)}${item.description.length > 100 ? '...' : ''}</p>` : ''}
+        <div class="item-actions">
+            <button class="btn btn-small btn-secondary" onclick="editExperience(${item.id})">✏️ Редактировать</button>
+            <button class="btn btn-small btn-secondary" onclick="deleteExperience(${item.id})">🗑️ Удалить</button>
+        </div>
+    `;
+    
+    return card;
+}  
         // Загрузка образования
         async function loadEducation() {
             try {
@@ -968,35 +998,123 @@
             }
         }
         // Загрузка достижений
-        async function loadAchievements() {
-            try {
-                const data = await API.achievements.list(resumeId);
-                const list = document.getElementById('achievementsList');
-                list.innerHTML = '';
-                data.forEach(item => {
-                    const card = createAchievementCard(item);
-                    list.appendChild(card);
-                });
-                document.getElementById('achievementsCount').textContent = data.length;
-            } catch (error) {
-                console.error('Error loading achievements:', error);
-            }
+        // Загрузка достижений
+async function loadAchievements() {
+    try {
+        const data = await API.achievements.list(resumeId);
+        const list = document.getElementById('achievementsList');
+        list.innerHTML = '';
+        
+        if (data && data.length > 0) {
+            data.forEach(item => {
+                const card = createAchievementCard(item);
+                list.appendChild(card);
+            });
+        } else {
+            list.innerHTML = '<p class="empty-state">Достижения еще не добавлены</p>';
         }
-        // Загрузка языков
-        async function loadLanguages() {
-            try {
-                const data = await API.languages.list(resumeId);
-                const list = document.getElementById('languagesList');
-                list.innerHTML = '';
-                data.forEach(item => {
-                    const card = createLanguageCard(item);
-                    list.appendChild(card);
-                });
-                document.getElementById('languagesCount').textContent = data.length;
-            } catch (error) {
-                console.error('Error loading languages:', error);
-            }
+        
+        document.getElementById('achievementsCount').textContent = data ? data.length : 0;
+    } catch (error) {
+        console.error('Error loading achievements:', error);
+        document.getElementById('achievementsList').innerHTML = '<p class="empty-state">Достижения еще не добавлены</p>';
+        document.getElementById('achievementsCount').textContent = '0';
+    }
+}
+
+function createAchievementCard(item) {
+    const card = document.createElement('div');
+    card.className = 'item-card';
+    
+    card.innerHTML = `
+        <h4>${item.title}</h4>
+        ${item.date ? `<p>📅 ${formatDate(item.date)}</p>` : ''}
+        ${item.description ? `<p>${item.description.substring(0, 100)}${item.description.length > 100 ? '...' : ''}</p>` : ''}
+        <div class="item-actions">
+            <button class="btn btn-small btn-secondary" onclick="editAchievement(${item.id})">✏️ Редактировать</button>
+            <button class="btn btn-small btn-secondary" onclick="deleteAchievement(${item.id})">🗑️ Удалить</button>
+        </div>
+    `;
+    
+    return card;
+}
+
+// Загрузка языков
+async function loadLanguages() {
+    try {
+        const data = await API.languages.list(resumeId);
+        const list = document.getElementById('languagesList');
+        list.innerHTML = '';
+        
+        if (data && data.length > 0) {
+            data.forEach(item => {
+                const card = createLanguageCard(item);
+                list.appendChild(card);
+            });
+        } else {
+            list.innerHTML = '<p class="empty-state">Языки еще не добавлены</p>';
         }
+        
+        document.getElementById('languagesCount').textContent = data ? data.length : 0;
+    } catch (error) {
+        console.error('Error loading languages:', error);
+        document.getElementById('languagesList').innerHTML = '<p class="empty-state">Языки еще не добавлены</p>';
+        document.getElementById('languagesCount').textContent = '0';
+    }
+}
+
+function createLanguageCard(item) {
+    const card = document.createElement('div');
+    card.className = 'item-card';
+    
+    card.innerHTML = `
+        <h4>${item.language}</h4>
+        <p><strong>Уровень:</strong> ${item.proficiency_display || item.proficiency_level}</p>
+        <div class="item-actions">
+            <button class="btn btn-small btn-secondary" onclick="editLanguage(${item.id})">✏️ Редактировать</button>
+            <button class="btn btn-small btn-secondary" onclick="deleteLanguage(${item.id})">🗑️ Удалить</button>
+        </div>
+    `;
+    
+    return card;
+}
+
+// Функция обновления предпросмотра
+async function refreshPreview() {
+    const previewContent = document.getElementById('previewContent');
+    previewContent.innerHTML = `
+        <div class="loading">
+            <div class="spinner"></div>
+            <p>Загрузка предпросмотра...</p>
+        </div>
+    `;
+    
+    try {
+        // Пока просто показываем заглушку
+        // В будущем здесь будет реальный рендеринг резюме
+        previewContent.innerHTML = `
+            <div style="padding: 2rem; text-align: center;">
+                <h3>Предпросмотр резюме</h3>
+                <p style="color: #64748b; margin-top: 1rem;">Здесь будет отображаться ваше резюме</p>
+                <p style="color: #64748b;">Функция предпросмотра в разработке</p>
+            </div>
+        `;
+    } catch (error) {
+        console.error('Error refreshing preview:', error);
+        previewContent.innerHTML = `
+            <div style="padding: 2rem; text-align: center; color: #ef4444;">
+                <p>Ошибка загрузки предпросмотра</p>
+            </div>
+        `;
+    }
+}
+
+// Вспомогательная функция форматирования даты
+function formatDate(dateString) {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' });
+}
         // Установка обработчиков событий
         function setupEventListeners() {
             document.getElementById('personalInfoForm').addEventListener('submit', savePersonalInfo);

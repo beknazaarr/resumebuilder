@@ -39,17 +39,19 @@ async function apiRequest(endpoint, options = {}) {
         });
 
         if (response.status === 401) {
-            // Токен истек, попробуем обновить
             const refreshed = await refreshToken();
             if (refreshed) {
-                // Повторяем запрос с новым токеном
                 return apiRequest(endpoint, options);
             } else {
-                // Не удалось обновить токен, разлогиниваем
                 clearTokens();
                 window.location.href = '/login.html';
                 return null;
             }
+        }
+
+        // Для DELETE запросов может не быть JSON
+        if (response.status === 204) {
+            return { message: 'Success' };
         }
 
         const data = await response.json();
@@ -148,26 +150,24 @@ const API = {
         }),
         
         exportPDF: (id) => {
-            const token = getToken();
             window.open(`${API_BASE_URL}/resumes/${id}/export/pdf/`, '_blank');
         },
         
         exportDOCX: (id) => {
-            const token = getToken();
             window.open(`${API_BASE_URL}/resumes/${id}/export/docx/`, '_blank');
         }
     },
 
     // Личная информация
     personalInfo: {
-        get: (resumeId) => apiRequest(`/resumes/${resumeId}/personal-info/`),
+        get: (resumeId) => apiRequest(`/resume/${resumeId}/personal-info/`),
         
-        createOrUpdate: (resumeId, data) => apiRequest(`/resumes/${resumeId}/personal-info/`, {
+        createOrUpdate: (resumeId, data) => apiRequest(`/resume/${resumeId}/personal-info/`, {
             method: 'POST',
             body: JSON.stringify(data)
         }),
         
-        update: (resumeId, data) => apiRequest(`/resumes/${resumeId}/personal-info/`, {
+        update: (resumeId, data) => apiRequest(`/resume/${resumeId}/personal-info/`, {
             method: 'PATCH',
             body: JSON.stringify(data)
         })
@@ -226,6 +226,44 @@ const API = {
         }),
         
         delete: (resumeId, id) => apiRequest(`/resumes/${resumeId}/skills/${id}/`, {
+            method: 'DELETE'
+        })
+    },
+
+    // Достижения
+    achievements: {
+        list: (resumeId) => apiRequest(`/resumes/${resumeId}/achievements/`),
+        
+        create: (resumeId, data) => apiRequest(`/resumes/${resumeId}/achievements/`, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        }),
+        
+        update: (resumeId, id, data) => apiRequest(`/resumes/${resumeId}/achievements/${id}/`, {
+            method: 'PATCH',
+            body: JSON.stringify(data)
+        }),
+        
+        delete: (resumeId, id) => apiRequest(`/resumes/${resumeId}/achievements/${id}/`, {
+            method: 'DELETE'
+        })
+    },
+
+    // Языки
+    languages: {
+        list: (resumeId) => apiRequest(`/resumes/${resumeId}/languages/`),
+        
+        create: (resumeId, data) => apiRequest(`/resumes/${resumeId}/languages/`, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        }),
+        
+        update: (resumeId, id, data) => apiRequest(`/resumes/${resumeId}/languages/${id}/`, {
+            method: 'PATCH',
+            body: JSON.stringify(data)
+        }),
+        
+        delete: (resumeId, id) => apiRequest(`/resumes/${resumeId}/languages/${id}/`, {
             method: 'DELETE'
         })
     },
