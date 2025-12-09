@@ -135,16 +135,16 @@ const API = {
     },
 
     personalInfo: {
-        get: (resumeId) => apiRequest(`/resume/${resumeId}/personal-info/`),
-        createOrUpdate: (resumeId, data) => apiRequest(`/resume/${resumeId}/personal-info/`, {
-            method: 'POST',
-            body: JSON.stringify(data)
-        }),
-        update: (resumeId, data) => apiRequest(`/resume/${resumeId}/personal-info/`, {
-            method: 'PATCH',
-            body: JSON.stringify(data)
-        })
-    },
+    get: (resumeId) => apiRequest(`/resumes/${resumeId}/personal-info/`),  // ← Исправлено
+    createOrUpdate: (resumeId, data) => apiRequest(`/resumes/${resumeId}/personal-info/`, {
+        method: 'POST',
+        body: JSON.stringify(data)
+    }),
+    update: (resumeId, data) => apiRequest(`/resumes/${resumeId}/personal-info/`, {
+        method: 'PATCH',
+        body: JSON.stringify(data)
+    })
+},
 
     education: {
         list: (resumeId) => apiRequest(`/resumes/${resumeId}/education/`),
