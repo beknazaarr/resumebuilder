@@ -838,6 +838,7 @@
         let resumeData = null;
         let currentEditId = null;
         let currentSection = 'personal';
+        let currentTemplate = null;
         let zoomScale = 1;
 
         // Получить ID резюме из URL
@@ -879,18 +880,30 @@
 
         // Загрузка резюме
         async function loadResume() {
-            try {
-                resumeData = await API.resumes.get(resumeId);
-                document.getElementById('resumeTitle').textContent = resumeData.title;
-                
-                if (resumeData.template_id) {
-                    document.getElementById('templateSelect').value = resumeData.template_id;
-                }
-            } catch (error) {
-                console.error('Error loading resume:', error);
-                alert('Ошибка загрузки резюме');
-                window.location.href = '/dashboard.html';
-            }
+        try {
+        resumeData = await API.resumes.get(resumeId);
+        document.getElementById('resumeTitle').textContent = resumeData.title;
+        
+        if (resumeData.template_id) {
+            document.getElementById('templateSelect').value = resumeData.template_id;
+            await loadTemplate(resumeData.template_id); // ← ДОБАВЬ ЭТУ СТРОКУ
+        }
+         } catch (error) {
+        console.error('Error loading resume:', error);
+        alert('Ошибка загрузки резюме');
+        window.location.href = '/dashboard.html';
+         }
+        }
+
+        // Загрузка данных шаблона
+        async function loadTemplate(templateId) {
+        try {
+            currentTemplate = await API.templates.get(templateId);
+            console.log('Template loaded:', currentTemplate);
+        } catch (error) {
+        console.error('Error loading template:', error);
+        currentTemplate = null;
+        }
         }
 
         // Загрузка всех данных
@@ -1089,7 +1102,7 @@ function formatDate(dateString) {
 
 // Функция обновления предпросмотра
 // Функция обновления предпросмотра
-async function refreshPreview() {
+aasync function refreshPreview() {
     const previewContent = document.getElementById('previewContent');
     previewContent.innerHTML = `
         <div class="loading">
@@ -1101,10 +1114,27 @@ async function refreshPreview() {
     try {
         const data = await API.resumes.get(resumeId);
         
-        // ========= ИЗМЕНИТЬ ЗДЕСЬ =========
-        const html = generatePreviewHTML(data);
+        // Проверяем, загружен ли шаблон
+        if (!currentTemplate && data.template_id) {
+            await loadTemplate(data.template_id);
+        }
+        
+        let html;
+        
+        if (currentTemplate && currentTemplate.html_structure) {
+            // Используем HTML из шаблона
+            html = generatePreviewFromTemplate(data, currentTemplate);
+        } else {
+            // Используем встроенный шаблон по умолчанию
+            html = generatePreviewHTML(data);
+        }
+        
         previewContent.innerHTML = html;
-        // ==================================
+        
+        // Применяем CSS шаблона если есть
+        if (currentTemplate && currentTemplate.css_styles) {
+            applyTemplateStyles(currentTemplate.css_styles);
+        }
         
     } catch (error) {
         console.error('Error refreshing preview:', error);
@@ -1114,6 +1144,76 @@ async function refreshPreview() {
             </div>
         `;
     }
+}
+
+// Генерация HTML из шаблона с подстановкой данных
+function generatePreviewFromTemplate(data, template) {
+    const personalInfo = data.personal_info || {};
+    const education = data.education || [];
+    const workExperience = data.work_experience || [];
+    const skills = data.skills || [];
+    const achievements = data.achievements || [];
+    const languages = data.languages || [];
+    
+    let html = template.html_structure;
+    
+    // Подстановка личных данных
+    html = html.replace(/\{\{full_name\}\}/g, personalInfo.full_name || 'Ваше Имя');
+    html = html.replace(/\{\{email\}\}/g, personalInfo.email || '');
+    html = html.replace(/\{\{phone\}\}/g, personalInfo.phone || '');
+    html = html.replace(/\{\{address\}\}/g, personalInfo.address || '');
+    html = html.replace(/\{\{linkedin\}\}/g, personalInfo.linkedin || '');
+    html = html.replace(/\{\{website\}\}/g, personalInfo.website || '');
+    html = html.replace(/\{\{summary\}\}/g, personalInfo.summary || '');
+    
+    // Подстановка опыта работы
+    const workHtml = workExperience.map(exp => `
+        <div class="work-item">
+            <h3>${exp.position}</h3>
+            <div class="company">${exp.company}</div>
+            <div class="dates">${formatDate(exp.start_date)} - ${exp.is_current ? 'настоящее время' : formatDate(exp.end_date)}</div>
+            ${exp.description ? `<p>${exp.description}</p>` : ''}
+        </div>
+    `).join('');
+    html = html.replace(/\{\{work_experience\}\}/g, workHtml);
+    
+    // Подстановка образования
+    const eduHtml = education.map(edu => `
+        <div class="education-item">
+            <h3>${edu.institution}</h3>
+            <div class="degree">${edu.degree} - ${edu.field_of_study}</div>
+            <div class="dates">${formatDate(edu.start_date)} - ${edu.end_date ? formatDate(edu.end_date) : 'настоящее время'}</div>
+            ${edu.description ? `<p>${edu.description}</p>` : ''}
+        </div>
+    `).join('');
+    html = html.replace(/\{\{education\}\}/g, eduHtml);
+    
+    // Подстановка навыков
+    const skillsHtml = skills.map(skill => `
+        <span class="skill-badge">${skill.name} (${skill.level_display || skill.level})</span>
+    `).join('');
+    html = html.replace(/\{\{skills\}\}/g, skillsHtml);
+    
+    // Подстановка достижений
+    const achievementsHtml = achievements.map(ach => `
+        <div class="achievement-item">
+            <h4>${ach.title}</h4>
+            ${ach.date ? `<div class="date">${formatDate(ach.date)}</div>` : ''}
+            ${ach.description ? `<p>${ach.description}</p>` : ''}
+        </div>
+    `).join('');
+    html = html.replace(/\{\{achievements\}\}/g, achievementsHtml);
+    
+    // Подстановка языков
+    const languagesHtml = languages.map(lang => `
+        <div class="language-item">
+            <span class="language-name">${lang.language}</span>
+            <span class="language-level">${lang.proficiency_display || lang.proficiency_level}</span>
+        </div>
+    `).join('');
+    html = html.replace(/\{\{languages\}\}/g, languagesHtml);
+    
+    return html;
 }
 
 // Генерация HTML для предпросмотра
@@ -1298,6 +1398,24 @@ function formatDate(dateString) {
     const date = new Date(dateString);
     const options = { year: 'numeric', month: 'long' };
     return date.toLocaleDateString('ru-RU', options);
+}
+
+// Применение стилей шаблона
+function applyTemplateStyles(cssStyles) {
+    // Удаляем старый style элемент если есть
+    const oldStyle = document.getElementById('template-styles');
+    if (oldStyle) {
+        oldStyle.remove();
+    }
+    
+    // Создаём новый style элемент
+    const styleElement = document.createElement('style');
+    styleElement.id = 'template-styles';
+    styleElement.textContent = cssStyles;
+    
+    // Добавляем в preview-content
+    const previewContent = document.getElementById('previewContent');
+    previewContent.appendChild(styleElement);
 }
 
 // Вспомогательная функция форматирования даты
@@ -1746,10 +1864,22 @@ function exportPDF() {
     API.resumes.exportPDF(resumeId);
 }
 
-function changeTemplate() {
+    async function changeTemplate() {
     const templateId = document.getElementById('templateSelect').value;
-    // В будущем здесь будет логика смены шаблона
-    console.log('Template changed to:', templateId);
+    if (!templateId) return;
+    
+    // Загружаем новый шаблон
+    await loadTemplate(templateId);
+    
+    // Обновляем резюме в базе
+    try {
+        await API.resumes.update(resumeId, { template: parseInt(templateId) });
+        await refreshPreview();
+        showAlert('alertPersonal', 'Шаблон изменён!', 'success');
+    } catch (error) {
+        console.error('Error changing template:', error);
+        showAlert('alertPersonal', 'Ошибка смены шаблона', 'error');
+    }
 }
 
 function zoomIn() {
