@@ -137,6 +137,9 @@ class ResumeDetailSerializer(serializers.ModelSerializer):
     
     template_name = serializers.CharField(source='template.name', read_only=True)
     template_id = serializers.IntegerField(source='template.id', read_only=True)
+
+    template_html = serializers.CharField(source='template.html_structure', read_only=True)
+    template_css = serializers.CharField(source='template.css_styles', read_only=True)
     
     # Статистика
     sections_count = serializers.SerializerMethodField()
@@ -145,7 +148,9 @@ class ResumeDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Resume
         fields = (
-            'id', 'title', 'template', 'template_id', 'template_name', 'photo', 'is_primary',
+            'id', 'title', 'template', 'template_id', 'template_name', 
+            'template_html', 'template_css',
+            'photo', 'is_primary',
             'personal_info', 'education', 'work_experience', 'skills', 
             'achievements', 'languages',
             'sections_count', 'completion_percentage',
