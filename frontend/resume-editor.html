@@ -1122,73 +1122,174 @@ function generatePreviewHTML(data) {
     const education = data.education || [];
     const workExperience = data.work_experience || [];
     const skills = data.skills || [];
+    const achievements = data.achievements || [];
+    const languages = data.languages || [];
     
-    // Берем HTML шаблона из БД
-    let html = data.template_html || '<p>Шаблон не найден</p>';
-    
-    // Замена простых переменных
-    html = html.replace(/{{full_name}}/g, personalInfo.full_name || 'Ваше Имя');
-    html = html.replace(/{{first_name}}/g, (personalInfo.full_name || 'Имя').split(' ')[0]);
-    html = html.replace(/{{last_name}}/g, (personalInfo.full_name || 'Фамилия').split(' ')[1] || '');
-    html = html.replace(/{{job_title}}/g, 'Должность'); // ← Здесь можете добавить поле в PersonalInfo
-    html = html.replace(/{{phone}}/g, personalInfo.phone || 'Телефон не указан');
-    html = html.replace(/{{email}}/g, personalInfo.email || 'Email не указан');
-    html = html.replace(/{{address}}/g, personalInfo.address || 'Адрес не указан');
-    html = html.replace(/{{summary}}/g, personalInfo.summary || 'О себе не заполнено');
-    
-    // Замена фото
-    const photoHtml = data.photo 
-        ? `<img src="${data.photo}" alt="Фото" class="candidate-photo">` 
-        : '<img src="https://via.placeholder.com/300x400?text=NO+PHOTO" alt="Нет фото" class="candidate-photo">';
-    html = html.replace(/{{photo_html}}/g, photoHtml);
-    
-    // Замена списка опыта работы
-    let workHtml = '';
-    workExperience.forEach(exp => {
-        const endDate = exp.is_current ? 'PRESENT' : formatDate(exp.end_date);
-        workHtml += `
-            <div class="experience-item">
-                <p class="dates ${exp.is_current ? 'current-job' : ''}">${formatDate(exp.start_date)} – ${endDate}</p>
-                <p class="job-title-exp">${exp.position} | ${exp.company}</p>
-                <p class="job-description">${exp.description || ''}</p>
+    return `
+        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333;">
+            <!-- Header -->
+            <div style="text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 3px solid #2563eb;">
+                <h1 style="margin: 0 0 10px 0; color: #1e293b; font-size: 2.5rem;">
+                    ${personalInfo.full_name || 'Ваше Имя'}
+                </h1>
+                <div style="color: #64748b; font-size: 0.95rem;">
+                    ${personalInfo.email ? `📧 ${personalInfo.email}` : ''}
+                    ${personalInfo.phone ? ` | 📱 ${personalInfo.phone}` : ''}
+                    ${personalInfo.address ? ` | 📍 ${personalInfo.address}` : ''}
+                </div>
+                ${personalInfo.linkedin || personalInfo.website ? `
+                    <div style="color: #2563eb; font-size: 0.9rem; margin-top: 5px;">
+                        ${personalInfo.linkedin ? `<a href="${personalInfo.linkedin}" style="color: #2563eb; text-decoration: none;">LinkedIn</a>` : ''}
+                        ${personalInfo.linkedin && personalInfo.website ? ' | ' : ''}
+                        ${personalInfo.website ? `<a href="${personalInfo.website}" style="color: #2563eb; text-decoration: none;">Website</a>` : ''}
+                    </div>
+                ` : ''}
             </div>
-        `;
-    });
-    html = html.replace(/{{work_experience_list}}/g, workHtml || '<p>Опыт работы не добавлен</p>');
-    
-    // Замена списка образования
-    let eduHtml = '';
-    education.forEach(edu => {
-        eduHtml += `
-            <div class="education-item">
-                <p class="dates">${formatDate(edu.start_date)} – ${edu.end_date ? formatDate(edu.end_date) : 'Настоящее время'}</p>
-                <p class="degree">${edu.degree} in ${edu.field_of_study}</p>
-                <ul>
-                    <li>${edu.institution}</li>
-                    ${edu.description ? `<li>${edu.description}</li>` : ''}
-                </ul>
+
+            <!-- О себе -->
+            ${personalInfo.summary ? `
+                <div style="margin-bottom: 30px;">
+                    <h2 style="color: #2563eb; font-size: 1.5rem; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 2px solid #e2e8f0;">
+                        💼 О себе
+                    </h2>
+                    <p style="margin: 10px 0; color: #475569; text-align: justify;">
+                        ${personalInfo.summary}
+                    </p>
+                </div>
+            ` : ''}
+
+            <!-- Опыт работы -->
+            ${workExperience.length > 0 ? `
+                <div style="margin-bottom: 30px;">
+                    <h2 style="color: #2563eb; font-size: 1.5rem; margin-bottom: 15px; padding-bottom: 5px; border-bottom: 2px solid #e2e8f0;">
+                        💼 Опыт работы
+                    </h2>
+                    ${workExperience.map(exp => `
+                        <div style="margin-bottom: 20px; padding: 15px; background: #f8fafc; border-left: 4px solid #2563eb; border-radius: 4px;">
+                            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px;">
+                                <h3 style="margin: 0; color: #1e293b; font-size: 1.1rem;">
+                                    ${exp.position}
+                                </h3>
+                                <span style="color: #64748b; font-size: 0.9rem; white-space: nowrap;">
+                                    ${formatDate(exp.start_date)} - ${exp.is_current ? 'настоящее время' : formatDate(exp.end_date)}
+                                </span>
+                            </div>
+                            <div style="color: #2563eb; font-weight: 600; margin-bottom: 8px;">
+                                ${exp.company}
+                            </div>
+                            ${exp.description ? `
+                                <p style="margin: 8px 0 0 0; color: #475569; font-size: 0.95rem;">
+                                    ${exp.description}
+                                </p>
+                            ` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            ` : ''}
+
+            <!-- Образование -->
+            ${education.length > 0 ? `
+                <div style="margin-bottom: 30px;">
+                    <h2 style="color: #2563eb; font-size: 1.5rem; margin-bottom: 15px; padding-bottom: 5px; border-bottom: 2px solid #e2e8f0;">
+                        🎓 Образование
+                    </h2>
+                    ${education.map(edu => `
+                        <div style="margin-bottom: 20px; padding: 15px; background: #f8fafc; border-left: 4px solid #10b981; border-radius: 4px;">
+                            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px;">
+                                <h3 style="margin: 0; color: #1e293b; font-size: 1.1rem;">
+                                    ${edu.institution}
+                                </h3>
+                                <span style="color: #64748b; font-size: 0.9rem; white-space: nowrap;">
+                                    ${formatDate(edu.start_date)} - ${edu.end_date ? formatDate(edu.end_date) : 'настоящее время'}
+                                </span>
+                            </div>
+                            <div style="color: #10b981; font-weight: 600; margin-bottom: 5px;">
+                                ${edu.degree} - ${edu.field_of_study}
+                            </div>
+                            ${edu.description ? `
+                                <p style="margin: 8px 0 0 0; color: #475569; font-size: 0.95rem;">
+                                    ${edu.description}
+                                </p>
+                            ` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            ` : ''}
+
+            <!-- Навыки -->
+            ${skills.length > 0 ? `
+                <div style="margin-bottom: 30px;">
+                    <h2 style="color: #2563eb; font-size: 1.5rem; margin-bottom: 15px; padding-bottom: 5px; border-bottom: 2px solid #e2e8f0;">
+                        ⚡ Навыки
+                    </h2>
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                        ${skills.map(skill => `
+                            <div style="padding: 8px 16px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 20px; font-size: 0.9rem; font-weight: 500;">
+                                ${skill.name} 
+                                <span style="opacity: 0.8; font-size: 0.85rem;">
+                                    (${skill.level_display || skill.level})
+                                </span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            ` : ''}
+
+            <!-- Достижения -->
+            ${achievements.length > 0 ? `
+                <div style="margin-bottom: 30px;">
+                    <h2 style="color: #2563eb; font-size: 1.5rem; margin-bottom: 15px; padding-bottom: 5px; border-bottom: 2px solid #e2e8f0;">
+                        🏆 Достижения
+                    </h2>
+                    ${achievements.map(achievement => `
+                        <div style="margin-bottom: 15px; padding: 12px; background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px;">
+                            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                                <h3 style="margin: 0; color: #92400e; font-size: 1rem;">
+                                    ${achievement.title}
+                                </h3>
+                                ${achievement.date ? `
+                                    <span style="color: #92400e; font-size: 0.85rem; opacity: 0.8;">
+                                        ${formatDate(achievement.date)}
+                                    </span>
+                                ` : ''}
+                            </div>
+                            ${achievement.description ? `
+                                <p style="margin: 5px 0 0 0; color: #78350f; font-size: 0.9rem;">
+                                    ${achievement.description}
+                                </p>
+                            ` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            ` : ''}
+
+            <!-- Языки -->
+            ${languages.length > 0 ? `
+                <div style="margin-bottom: 30px;">
+                    <h2 style="color: #2563eb; font-size: 1.5rem; margin-bottom: 15px; padding-bottom: 5px; border-bottom: 2px solid #e2e8f0;">
+                        🌍 Языки
+                    </h2>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                        ${languages.map(lang => `
+                            <div style="padding: 12px; background: #f0fdf4; border-left: 4px solid #22c55e; border-radius: 4px;">
+                                <div style="font-weight: 600; color: #166534; margin-bottom: 4px;">
+                                    ${lang.language}
+                                </div>
+                                <div style="color: #15803d; font-size: 0.9rem;">
+                                    ${lang.proficiency_display || lang.proficiency_level}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            ` : ''}
+
+            <!-- Футер -->
+            <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #e2e8f0; text-align: center; color: #94a3b8; font-size: 0.85rem;">
+                <p style="margin: 0;">Создано с помощью Resume Builder</p>
             </div>
-        `;
-    });
-    html = html.replace(/{{education_list}}/g, eduHtml || '<p>Образование не добавлено</p>');
-    
-    // Замена списка навыков
-    let skillsHtml = '';
-    const colors = ['red', 'yellow', 'orange'];
-    skills.forEach((skill, index) => {
-        const color = colors[index % colors.length];
-        skillsHtml += `<span class="chip ${color}">${skill.name}</span>`;
-    });
-    html = html.replace(/{{skills_list}}/g, skillsHtml || '<span class="chip red">Навыки не добавлены</span>');
-    
-    // Применяем CSS
-    const css = data.template_css || '';
-    const fullHtml = `
-        <style>${css}</style>
-        ${html}
+        </div>
     `;
-    
-    return fullHtml;
 }
 
 // Вспомогательная функция форматирования даты для предпросмотра
@@ -1197,6 +1298,13 @@ function formatDate(dateString) {
     const date = new Date(dateString);
     const options = { year: 'numeric', month: 'long' };
     return date.toLocaleDateString('ru-RU', options);
+}
+
+// Вспомогательная функция форматирования даты
+function formatDate(dateString) {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' });
 }
         // Установка обработчиков событий
         function setupEventListeners() {
