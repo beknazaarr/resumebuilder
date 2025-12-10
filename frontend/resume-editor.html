@@ -533,78 +533,51 @@
             </div>
 
             <!-- Personal Info Section -->
-            <div id="personalSection" class="section-content active">
-                <h3>Личная информация</h3>
-                <div id="alertPersonal" class="alert"></div>
-                
-                <form id="personalInfoForm">
-                    <div class="form-group">
-                        <label>ФИО *</label>
-                        <input type="text" id="fullName" required placeholder="Иван Иванов">
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Телефон</label>
-                            <input type="tel" id="phone" placeholder="+996 XXX XXX XXX">
-                        </div>
-                        <div class="form-group">
-                            <label>Email *</label>
-                            <input type="email" id="email" required placeholder="example@mail.com">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Адрес</label>
-                        <input type="text" id="address" placeholder="Город, Страна">
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>LinkedIn</label>
-                            <input type="url" id="linkedin" placeholder="https://linkedin.com/in/...">
-                        </div>
-                        <div class="form-group">
-                            <label>Веб-сайт</label>
-                            <input type="url" id="website" placeholder="https://...">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>О себе</label>
-                        <textarea id="summary" placeholder="Расскажите о себе, своём опыте и целях..."></textarea>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary" style="width: 100%;">
-                        Сохранить личную информацию
-                    </button>
-                </form>
-            </div>
-            
-            <!-- В personalSection, после формы personalInfoForm -->
-<div style="margin-top: 2rem; padding-top: 2rem; border-top: 2px solid #e2e8f0;">
-    <h3>Фотография</h3>
-    <div id="alertPhoto" class="alert"></div>
+            <!-- Personal Info Section -->
+<div id="personalSection" class="section-content active">
+    <h3>Личная информация</h3>
+    <div id="alertPersonal" class="alert"></div>
     
-    <div id="photoPreview" style="margin-bottom: 1rem;">
-        <div id="currentPhoto" style="display: none;">
-            <img id="photoImage" style="max-width: 200px; border-radius: 8px; margin-bottom: 1rem;" />
-            <div>
-                <button type="button" class="btn btn-secondary btn-small" onclick="removePhoto()">
-                    🗑️ Удалить фото
-                </button>
+    <form id="personalInfoForm">
+        <!-- Все поля формы -->
+        <div class="form-group">
+            <label>ФИО *</label>
+            <input type="text" id="fullName" required placeholder="Иван Иванов">
+        </div>
+        <!-- ... остальные поля ... -->
+        <button type="submit" class="btn btn-primary" style="width: 100%;">
+            Сохранить личную информацию
+        </button>
+    </form>
+
+    <!-- Секция фото ТОЛЬКО в personalSection -->
+    <div style="margin-top: 2rem; padding-top: 2rem; border-top: 2px solid #e2e8f0;">
+        <h3>Фотография</h3>
+        <div id="alertPhoto" class="alert"></div>
+        
+        <div id="photoPreview" style="margin-bottom: 1rem;">
+            <div id="currentPhoto" style="display: none;">
+                <img id="photoImage" style="max-width: 200px; border-radius: 8px; margin-bottom: 1rem;" />
+                <div>
+                    <button type="button" class="btn btn-secondary btn-small" onclick="removePhoto()">
+                        🗑️ Удалить фото
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
-    
-    <div class="form-group">
-        <label>Загрузить фотографию</label>
-        <input type="file" id="photoInput" accept="image/*" onchange="uploadPhoto()">
-        <p style="font-size: 0.85rem; color: #64748b; margin-top: 0.5rem;">
-            Максимальный размер: 5MB. Форматы: JPG, PNG, WEBP
-        </p>
+        
+        <div class="form-group">
+            <label>Загрузить фотографию</label>
+            <input type="file" id="photoInput" accept="image/*" onchange="uploadPhoto()">
+            <p style="font-size: 0.85rem; color: #64748b; margin-top: 0.5rem;">
+                Максимальный размер: 5MB. Форматы: JPG, PNG, WEBP
+            </p>
+        </div>
     </div>
 </div>
+            
+            <!-- В personalSection, после формы personalInfoForm -->
+
             <!-- Experience Section -->
             <div id="experienceSection" class="section-content">
                 <h3>Опыт работы</h3>
@@ -1174,14 +1147,27 @@ async function refreshPreview() {
 
 // Генерация HTML из шаблона с подстановкой данных
 function generatePreviewFromTemplate(data, template) {
-    const personalInfo = data.personal_info || {};
-    const education = data.education || [];
-    const workExperience = data.work_experience || [];
-    const skills = data.skills || [];
-    const achievements = data.achievements || [];
-    const languages = data.languages || [];
-    
-    let html = template.html_structure;
+        const personalInfo = data.personal_info || {};
+        const education = data.education || [];
+        const workExperience = data.work_experience || [];
+        const skills = data.skills || [];
+        const achievements = data.achievements || [];
+        const languages = data.languages || [];
+        
+        let html = template.html_structure;
+        
+        // Подстановка фото
+        if (data.photo) {
+            html = html.replace(/\{\{photo\}\}/g, data.photo);
+            // Удаляем условные блоки если есть
+            html = html.replace(/\{\{#if photo\}\}/g, '');
+            html = html.replace(/\{\{else\}\}[\s\S]*?\{\{\/if\}\}/g, '');
+            html = html.replace(/\{\{\/if\}\}/g, '');
+        } else {
+            // Удаляем блок с фото, оставляем пустой div
+            html = html.replace(/\{\{#if photo\}\}[\s\S]*?\{\{else\}\}/g, '');
+            html = html.replace(/\{\{\/if\}\}/g, '');
+        }
     
     // Подстановка личных данных
     html = html.replace(/\{\{full_name\}\}/g, personalInfo.full_name || 'Ваше Имя');
@@ -1194,11 +1180,13 @@ function generatePreviewFromTemplate(data, template) {
     
     // Подстановка опыта работы
     const workHtml = workExperience.map(exp => `
-        <div class="work-item">
-            <h3>${exp.position}</h3>
-            <div class="company">${exp.company}</div>
-            <div class="dates">${formatDate(exp.start_date)} - ${exp.is_current ? 'настоящее время' : formatDate(exp.end_date)}</div>
-            ${exp.description ? `<p>${exp.description}</p>` : ''}
+        <div class="experience-item">
+            <div class="experience-header">
+                <div class="experience-title">${exp.position}</div>
+                <div class="experience-date">${formatDate(exp.start_date)} - ${exp.is_current ? 'Present' : formatDate(exp.end_date)}</div>
+            </div>
+            <div class="experience-company">${exp.company}</div>
+            ${exp.description ? `<div class="experience-description">${exp.description}</div>` : ''}
         </div>
     `).join('');
     html = html.replace(/\{\{work_experience\}\}/g, workHtml);
@@ -1206,36 +1194,35 @@ function generatePreviewFromTemplate(data, template) {
     // Подстановка образования
     const eduHtml = education.map(edu => `
         <div class="education-item">
-            <h3>${edu.institution}</h3>
-            <div class="degree">${edu.degree} - ${edu.field_of_study}</div>
-            <div class="dates">${formatDate(edu.start_date)} - ${edu.end_date ? formatDate(edu.end_date) : 'настоящее время'}</div>
-            ${edu.description ? `<p>${edu.description}</p>` : ''}
+            <div class="education-header">
+                <div class="education-title">${edu.degree} - ${edu.field_of_study}</div>
+                <div class="education-date">${formatDate(edu.start_date)} - ${edu.end_date ? formatDate(edu.end_date) : 'Present'}</div>
+            </div>
+            <div class="education-school">${edu.institution}</div>
+            ${edu.description ? `<div class="education-description">${edu.description}</div>` : ''}
         </div>
     `).join('');
     html = html.replace(/\{\{education\}\}/g, eduHtml);
     
     // Подстановка навыков
     const skillsHtml = skills.map(skill => `
-        <span class="skill-badge">${skill.name} (${skill.level_display || skill.level})</span>
+        <li>${skill.name} (${skill.level_display || skill.level})</li>
     `).join('');
     html = html.replace(/\{\{skills\}\}/g, skillsHtml);
     
-    // Подстановка достижений
+    // Подстановка достижений (rewards)
     const achievementsHtml = achievements.map(ach => `
-        <div class="achievement-item">
-            <h4>${ach.title}</h4>
+        <div class="reward-item">
             ${ach.date ? `<div class="date">${formatDate(ach.date)}</div>` : ''}
-            ${ach.description ? `<p>${ach.description}</p>` : ''}
+            <div class="title">${ach.title}</div>
         </div>
     `).join('');
     html = html.replace(/\{\{achievements\}\}/g, achievementsHtml);
+    html = html.replace(/\{\{rewards\}\}/g, achievementsHtml); // На случай если используется {{rewards}}
     
     // Подстановка языков
     const languagesHtml = languages.map(lang => `
-        <div class="language-item">
-            <span class="language-name">${lang.language}</span>
-            <span class="language-level">${lang.proficiency_display || lang.proficiency_level}</span>
-        </div>
+        <div>${lang.language} - ${lang.proficiency_display || lang.proficiency_level}</div>
     `).join('');
     html = html.replace(/\{\{languages\}\}/g, languagesHtml);
     
