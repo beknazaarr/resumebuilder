@@ -345,19 +345,20 @@
             border-color: #2563eb;
         }
 
-        .preview-wrapper {
-            width: 100%;
-            max-width: 900px;
-            background: white;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-            transition: transform 0.3s;
-        }
-
         .preview-content {
-        padding: 40px;
-        min-height: 1100px;
+        padding: 0; /* ← Было 40px */
+        min-height: auto; /* ← Было 1100px */
         background: white;
-        }
+    }
+
+    .preview-wrapper {
+        width: 100%;
+        max-width: 900px;
+        background: white;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        transition: transform 0.3s;
+        overflow: hidden; /* ← Добавь это */
+    }
 
         /* Modal */
         .modal {
