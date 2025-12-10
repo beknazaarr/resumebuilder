@@ -580,7 +580,31 @@
                     </button>
                 </form>
             </div>
-
+            
+            <!-- В personalSection, после формы personalInfoForm -->
+<div style="margin-top: 2rem; padding-top: 2rem; border-top: 2px solid #e2e8f0;">
+    <h3>Фотография</h3>
+    <div id="alertPhoto" class="alert"></div>
+    
+    <div id="photoPreview" style="margin-bottom: 1rem;">
+        <div id="currentPhoto" style="display: none;">
+            <img id="photoImage" style="max-width: 200px; border-radius: 8px; margin-bottom: 1rem;" />
+            <div>
+                <button type="button" class="btn btn-secondary btn-small" onclick="removePhoto()">
+                    🗑️ Удалить фото
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="form-group">
+        <label>Загрузить фотографию</label>
+        <input type="file" id="photoInput" accept="image/*" onchange="uploadPhoto()">
+        <p style="font-size: 0.85rem; color: #64748b; margin-top: 0.5rem;">
+            Максимальный размер: 5MB. Форматы: JPG, PNG, WEBP
+        </p>
+    </div>
+</div>
             <!-- Experience Section -->
             <div id="experienceSection" class="section-content">
                 <h3>Опыт работы</h3>
@@ -855,6 +879,7 @@
         async function init() {
             await loadTemplates();
             await loadResume();
+            await loadCurrentPhoto();
             await loadAllData();
             setupEventListeners();
         }
@@ -1230,22 +1255,32 @@ function generatePreviewHTML(data) {
         <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333;">
             <!-- Header -->
             <div style="text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 3px solid #2563eb;">
-                <h1 style="margin: 0 0 10px 0; color: #1e293b; font-size: 2.5rem;">
-                    ${personalInfo.full_name || 'Ваше Имя'}
-                </h1>
-                <div style="color: #64748b; font-size: 0.95rem;">
-                    ${personalInfo.email ? `📧 ${personalInfo.email}` : ''}
-                    ${personalInfo.phone ? ` | 📱 ${personalInfo.phone}` : ''}
-                    ${personalInfo.address ? ` | 📍 ${personalInfo.address}` : ''}
-                </div>
-                ${personalInfo.linkedin || personalInfo.website ? `
-                    <div style="color: #2563eb; font-size: 0.9rem; margin-top: 5px;">
-                        ${personalInfo.linkedin ? `<a href="${personalInfo.linkedin}" style="color: #2563eb; text-decoration: none;">LinkedIn</a>` : ''}
-                        ${personalInfo.linkedin && personalInfo.website ? ' | ' : ''}
-                        ${personalInfo.website ? `<a href="${personalInfo.website}" style="color: #2563eb; text-decoration: none;">Website</a>` : ''}
-                    </div>
-                ` : ''}
-            </div>
+
+    ${data.photo ? `
+        <div style="margin-bottom: 20px;">
+            <img src="${data.photo}" alt="Photo" style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 4px solid #2563eb;">
+        </div>
+    ` : ''}
+
+    <h1 style="margin: 0 0 10px 0; color: #1e293b; font-size: 2.5rem;">
+        ${personalInfo.full_name || 'Ваше Имя'}
+    </h1>
+
+    <div style="color: #64748b; font-size: 0.95rem;">
+        ${personalInfo.email ? `📧 ${personalInfo.email}` : ''}
+        ${personalInfo.phone ? ` | 📱 ${personalInfo.phone}` : ''}
+        ${personalInfo.address ? ` | 📍 ${personalInfo.address}` : ''}
+    </div>
+
+    ${personalInfo.linkedin || personalInfo.website ? `
+        <div style="color: #2563eb; font-size: 0.9rem; margin-top: 5px;">
+            ${personalInfo.linkedin ? `<a href="${personalInfo.linkedin}" style="color: #2563eb; text-decoration: none;">LinkedIn</a>` : ''}
+            ${personalInfo.linkedin && personalInfo.website ? ' | ' : ''}
+            ${personalInfo.website ? `<a href="${personalInfo.website}" style="color: #2563eb; text-decoration: none;">Website</a>` : ''}
+        </div>
+    ` : ''}
+</div>
+
 
             <!-- О себе -->
             ${personalInfo.summary ? `
@@ -1842,6 +1877,93 @@ async function saveLanguage(e) {
     }
 }
 
+// Загрузка фото
+// Загрузка фото
+async function uploadPhoto() {
+    const fileInput = document.getElementById('photoInput');
+    const file = fileInput.files[0];
+    
+    if (!file) return;
+    
+    // Проверка размера
+    if (file.size > 5 * 1024 * 1024) {
+        showAlert('alertPhoto', 'Размер файла не должен превышать 5MB', 'error');
+        fileInput.value = '';
+        return;
+    }
+    
+    // Проверка типа
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+        showAlert('alertPhoto', 'Поддерживаемые форматы: JPG, PNG, WEBP', 'error');
+        fileInput.value = '';
+        return;
+    }
+    
+    try {
+        const response = await API.resumes.uploadPhoto(resumeId, file);
+        showAlert('alertPhoto', 'Фотография успешно загружена!', 'success');
+        
+        // Обновляем превью
+        document.getElementById('photoImage').src = response.photo_url;
+        document.getElementById('currentPhoto').style.display = 'block';
+        
+        // ← ДОБАВЬ ЭТИ СТРОКИ
+        // Обновляем resumeData чтобы фото появилось в предпросмотре
+        resumeData = await API.resumes.get(resumeId);
+        
+        // Очищаем input
+        fileInput.value = '';
+        
+        // Обновляем предпросмотр резюме
+        await refreshPreview();
+        
+    } catch (error) {
+        console.error('Error uploading photo:', error);
+        showAlert('alertPhoto', error.error || 'Ошибка загрузки фотографии', 'error');
+        fileInput.value = '';
+    }
+}
+
+// Удаление фото
+// Удаление фото
+async function removePhoto() {
+    if (!confirm('Удалить фотографию?')) return;
+    
+    try {
+        await API.resumes.deletePhoto(resumeId);
+        showAlert('alertPhoto', 'Фотография удалена', 'success');
+        
+        // Скрываем превью
+        document.getElementById('currentPhoto').style.display = 'none';
+        document.getElementById('photoImage').src = '';
+        
+        // ← ДОБАВЬ ЭТУ СТРОКУ
+        // Обновляем resumeData
+        resumeData = await API.resumes.get(resumeId);
+        
+        // Обновляем предпросмотр резюме
+        await refreshPreview();
+        
+    } catch (error) {
+        console.error('Error deleting photo:', error);
+        showAlert('alertPhoto', 'Ошибка удаления фотографии', 'error');
+    }
+}
+
+// Загрузка текущего фото при инициализации
+async function loadCurrentPhoto() {
+    try {
+        const data = await API.resumes.get(resumeId);
+        if (data.photo) {
+            document.getElementById('photoImage').src = data.photo;
+            document.getElementById('currentPhoto').style.display = 'block';
+        }
+    } catch (error) {
+        console.log('No photo loaded');
+    }
+}
+
 async function deleteLanguage(id) {
     if (!confirm('Удалить этот язык?')) return;
     
@@ -1905,10 +2027,27 @@ window.onclick = function(event) {
         event.target.classList.remove('active');
     }
 }
+
+
     </script>
 </body>
 </html>
     <style>
+        /* File Input */
+    input[type="file"] {
+    padding: 0.75rem;
+    border: 2px dashed #e2e8f0;
+    border-radius: 8px;
+    cursor: pointer;
+    background: #f8fafc;
+    transition: all 0.3s;
+    }
+
+    input[type="file"]:hover {
+    border-color: #2563eb;
+    background: #eff6ff;
+    }
+
         /* Reset and Base Styles */
         * {
             box-sizing: border-box;

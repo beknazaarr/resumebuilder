@@ -131,20 +131,59 @@ const API = {
         },
         exportDOCX: (id) => {
             window.open(`${API_BASE_URL}/resumes/${id}/export/docx/`, '_blank');
+        },
+        
+        // ФОТО
+        uploadPhoto: async (resumeId, file) => {
+            const formData = new FormData();
+            formData.append('photo', file);
+            
+            const token = getToken();
+            const response = await fetch(`${API_BASE_URL}/resumes/${resumeId}/photo/`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            });
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw error;
+            }
+            
+            return await response.json();
+        },
+
+        deletePhoto: async (resumeId) => {
+            const token = getToken();
+            const response = await fetch(`${API_BASE_URL}/resumes/${resumeId}/photo/`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw error;
+            }
+            
+            return await response.json();
         }
     },
 
     personalInfo: {
-    get: (resumeId) => apiRequest(`/resumes/${resumeId}/personal-info/`),  // ← Исправлено
-    createOrUpdate: (resumeId, data) => apiRequest(`/resumes/${resumeId}/personal-info/`, {
-        method: 'POST',
-        body: JSON.stringify(data)
-    }),
-    update: (resumeId, data) => apiRequest(`/resumes/${resumeId}/personal-info/`, {
-        method: 'PATCH',
-        body: JSON.stringify(data)
-    })
-},
+        get: (resumeId) => apiRequest(`/resumes/${resumeId}/personal-info/`),
+        createOrUpdate: (resumeId, data) => apiRequest(`/resumes/${resumeId}/personal-info/`, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        }),
+        update: (resumeId, data) => apiRequest(`/resumes/${resumeId}/personal-info/`, {
+            method: 'PATCH',
+            body: JSON.stringify(data)
+        })
+    },
 
     education: {
         list: (resumeId) => apiRequest(`/resumes/${resumeId}/education/`),
