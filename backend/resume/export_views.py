@@ -16,6 +16,18 @@ class ResumeExportPDFView(APIView):
     def get(self, request, pk):
         resume = get_object_or_404(Resume, pk=pk, user=request.user)
         
+        # Подгружаем связанные данные для оптимизации
+        resume = Resume.objects.select_related(
+            'template', 
+            'personal_info'
+        ).prefetch_related(
+            'education',
+            'work_experience',
+            'skills',
+            'achievements',
+            'languages'
+        ).get(pk=pk, user=request.user)
+        
         try:
             pdf_file = generate_pdf(resume)
             
@@ -30,7 +42,6 @@ class ResumeExportPDFView(APIView):
             return Response({
                 'error': f'Ошибка при генерации PDF: {str(e)}'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 
 class ResumeExportDOCXView(APIView):
     """Экспорт резюме в DOCX"""

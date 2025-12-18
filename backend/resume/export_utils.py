@@ -5,19 +5,178 @@ from docx import Document
 from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 
+def generate_html_from_template(resume):
+    """
+    Генерирует HTML с подстановкой данных резюме в шаблон
+    """
+    template = resume.template
+    html = template.html_structure
+    css = template.css_styles
+    
+    # Получаем данные
+    personal_info = getattr(resume, 'personal_info', None)
+    education = resume.education.all()
+    work_experience = resume.work_experience.all()
+    skills = resume.skills.all()
+    achievements = resume.achievements.all()
+    languages = resume.languages.all()
+    
+    # Подстановка фото
+    if resume.photo:
+        # Получаем полный URL фото
+        photo_url = resume.photo.url if hasattr(resume.photo, 'url') else str(resume.photo)
+        html = html.replace('{{photo}}', photo_url)
+        # Убираем условные блоки
+        html = html.replace('{{#if photo}}', '')
+        html = html.replace('{{else}}', '<!--')
+        html = html.replace('{{/if}}', '-->')
+    else:
+        # Убираем блок с фото
+        html = html.replace('{{#if photo}}', '<!--')
+        html = html.replace('{{else}}', '')
+        html = html.replace('{{/if}}', '-->')
+        html = html.replace('{{photo}}', '')
+    
+    # Подстановка личной информации
+    if personal_info:
+        html = html.replace('{{full_name}}', personal_info.full_name or '')
+        html = html.replace('{{email}}', personal_info.email or '')
+        html = html.replace('{{phone}}', personal_info.phone or '')
+        html = html.replace('{{address}}', personal_info.address or '')
+        html = html.replace('{{linkedin}}', personal_info.linkedin or '')
+        html = html.replace('{{website}}', personal_info.website or '')
+        html = html.replace('{{summary}}', personal_info.summary or '')
+    else:
+        # Заменяем пустыми значениями
+        html = html.replace('{{full_name}}', 'Ваше Имя')
+        html = html.replace('{{email}}', 'email@example.com')
+        html = html.replace('{{phone}}', '+X XXX XXX XXXX')
+        html = html.replace('{{address}}', '')
+        html = html.replace('{{linkedin}}', '')
+        html = html.replace('{{website}}', '')
+        html = html.replace('{{summary}}', '')
+    
+    # Подстановка опыта работы
+    work_html = ''
+    for exp in work_experience:
+        end_date = 'настоящее время' if exp.is_current else format_date_for_export(exp.end_date)
+        work_html += f'''
+        <div class="experience-item">
+            <div class="experience-header">
+                <div class="experience-title">{exp.position}</div>
+                <div class="experience-date">{format_date_for_export(exp.start_date)} - {end_date}</div>
+            </div>
+            <div class="experience-company">{exp.company}</div>
+            {f'<div class="experience-description">{exp.description}</div>' if exp.description else ''}
+        </div>
+        '''
+    html = html.replace('{{work_experience}}', work_html)
+    
+    # Подстановка образования
+    edu_html = ''
+    for edu in education:
+        end_date = format_date_for_export(edu.end_date) if edu.end_date else 'настоящее время'
+        edu_html += f'''
+        <div class="education-item">
+            <div class="education-header">
+                <div class="education-title">{edu.degree} - {edu.field_of_study}</div>
+                <div class="education-date">{format_date_for_export(edu.start_date)} - {end_date}</div>
+            </div>
+            <div class="education-school">{edu.institution}</div>
+            {f'<div class="education-description">{edu.description}</div>' if edu.description else ''}
+        </div>
+        '''
+    html = html.replace('{{education}}', edu_html)
+    
+    # Подстановка навыков
+    skills_html = '<ul style="list-style: none; padding: 0;">'
+    for skill in skills:
+        level_display = dict(skill.LEVEL_CHOICES).get(skill.level, skill.level)
+        skills_html += f'<li style="margin-bottom: 0.5rem;">• {skill.name} ({level_display})</li>'
+    skills_html += '</ul>'
+    html = html.replace('{{skills}}', skills_html)
+    
+    # Подстановка достижений
+    achievements_html = ''
+    for ach in achievements:
+        date_str = f'<div class="date">{format_date_for_export(ach.date)}</div>' if ach.date else ''
+        achievements_html += f'''
+        <div class="reward-item">
+            {date_str}
+            <div class="title">{ach.title}</div>
+            {f'<div class="description">{ach.description}</div>' if ach.description else ''}
+        </div>
+        '''
+    html = html.replace('{{achievements}}', achievements_html)
+    html = html.replace('{{rewards}}', achievements_html)  # На случай если используется {{rewards}}
+    
+    # Подстановка языков
+    languages_html = ''
+    for lang in languages:
+        level_display = dict(lang.PROFICIENCY_CHOICES).get(lang.proficiency_level, lang.proficiency_level)
+        languages_html += f'<div style="margin-bottom: 0.5rem;">{lang.language} - {level_display}</div>'
+    html = html.replace('{{languages}}', languages_html)
+    
+    # Оборачиваем в полный HTML документ с CSS
+    full_html = f'''
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            {css}
+            
+            /* Дополнительные стили для PDF */
+            body {{
+                margin: 0;
+                padding: 20px;
+            }}
+            @page {{
+                size: A4;
+                margin: 1cm;
+            }}
+        </style>
+    </head>
+    <body>
+        {html}
+    </body>
+    </html>
+    '''
+    
+    return full_html
+
+
+def format_date_for_export(date):
+    """Форматирование даты для экспорта"""
+    if not date:
+        return ''
+    try:
+        from datetime import datetime
+        if isinstance(date, str):
+            date = datetime.strptime(date, '%Y-%m-%d')
+        return date.strftime('%B %Y')
+    except:
+        return str(date)
+
 
 def generate_pdf(resume):
-    """Генерация PDF из резюме"""
-    # Получаем HTML из шаблона
-    html_content = render_to_string('resume/pdf_template.html', {
-        'resume': resume,
-        'personal_info': getattr(resume, 'personal_info', None),
-        'education': resume.education.all(),
-        'work_experience': resume.work_experience.all(),
-        'skills': resume.skills.all(),
-        'achievements': resume.achievements.all(),
-        'languages': resume.languages.all(),
-    })
+    """Генерация PDF из резюме с учётом шаблона"""
+    
+    # Проверяем, есть ли у резюме шаблон
+    if resume.template and resume.template.html_structure:
+        # Используем HTML из шаблона
+        html_content = generate_html_from_template(resume)
+    else:
+        # Используем дефолтный шаблон
+        html_content = render_to_string('resume/pdf_template.html', {
+            'resume': resume,
+            'personal_info': getattr(resume, 'personal_info', None),
+            'education': resume.education.all(),
+            'work_experience': resume.work_experience.all(),
+            'skills': resume.skills.all(),
+            'achievements': resume.achievements.all(),
+            'languages': resume.languages.all(),
+        })
     
     # Генерируем PDF
     pdf_file = BytesIO()
@@ -28,7 +187,9 @@ def generate_pdf(resume):
 
 
 def generate_docx(resume):
+
     """Генерация DOCX из резюме"""
+    
     doc = Document()
     
     # Настройки документа

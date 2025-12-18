@@ -126,13 +126,75 @@ const API = {
         setPrimary: (id) => apiRequest(`/resumes/${id}/set-primary/`, {
             method: 'POST'
         }),
-        exportPDF: (id) => {
-            window.open(`${API_BASE_URL}/resumes/${id}/export/pdf/`, '_blank');
-        },
-        exportDOCX: (id) => {
-            window.open(`${API_BASE_URL}/resumes/${id}/export/docx/`, '_blank');
-        },
+
+       exportPDF: async (id) => {
+        const token = getToken();
+    
+    // ← ВРЕМЕННАЯ ОТЛАДКА
+        console.log('Export PDF - Token:', token ? 'EXISTS' : 'MISSING');
+        console.log('Export PDF - Token length:', token ? token.length : 0);
+    
+        try {
+        const response = await fetch(`${API_BASE_URL}/resumes/${id}/export/pdf/`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
         
+        console.log('Response status:', response.status); // ← ОТЛАДКА
+        
+        if (!response.ok) {
+            throw new Error('Ошибка экспорта');
+        }
+        
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `resume_${id}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        } catch (error) {
+        console.error('Error exporting PDF:', error);
+        alert('Ошибка при экспорте PDF');
+        }
+        },
+
+        exportDOCX: async (id) => {
+        const token = getToken();
+        try {
+        const response = await fetch(`${API_BASE_URL}/resumes/${id}/export/docx/`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Ошибка экспорта');
+        }
+        
+        // Получаем blob (файл)
+        const blob = await response.blob();
+        
+        // Создаём ссылку для скачивания
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `resume_${id}.docx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        } catch (error) {
+        console.error('Error exporting DOCX:', error);
+        alert('Ошибка при экспорте DOCX');
+        }
+        },
+
         // ФОТО
         uploadPhoto: async (resumeId, file) => {
             const formData = new FormData();
