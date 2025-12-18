@@ -534,23 +534,60 @@
 
             <!-- Personal Info Section -->
             <!-- Personal Info Section -->
+<!-- Personal Info Section -->
 <div id="personalSection" class="section-content active">
     <h3>Личная информация</h3>
     <div id="alertPersonal" class="alert"></div>
     
     <form id="personalInfoForm">
-        <!-- Все поля формы -->
+        <!-- ФИО -->
         <div class="form-group">
             <label>ФИО *</label>
             <input type="text" id="fullName" required placeholder="Иван Иванов">
         </div>
-        <!-- ... остальные поля ... -->
+
+        <!-- Телефон -->
+        <div class="form-group">
+            <label>Телефон</label>
+            <input type="tel" id="phone" placeholder="+996 XXX XXX XXX">
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+            <label>Email *</label>
+            <input type="email" id="email" required placeholder="example@mail.com">
+        </div>
+
+        <!-- Адрес -->
+        <div class="form-group">
+            <label>Адрес</label>
+            <input type="text" id="address" placeholder="Бишкек, Кыргызстан">
+        </div>
+
+        <!-- LinkedIn -->
+        <div class="form-group">
+            <label>LinkedIn</label>
+            <input type="url" id="linkedin" placeholder="https://linkedin.com/in/username">
+        </div>
+
+        <!-- Website -->
+        <div class="form-group">
+            <label>Веб-сайт</label>
+            <input type="url" id="website" placeholder="https://mywebsite.com">
+        </div>
+
+        <!-- О себе -->
+        <div class="form-group">
+            <label>О себе</label>
+            <textarea id="summary" placeholder="Расскажите о себе, своем опыте и целях..."></textarea>
+        </div>
+
         <button type="submit" class="btn btn-primary" style="width: 100%;">
-            Сохранить личную информацию
+            💾 Сохранить личную информацию
         </button>
     </form>
 
-    <!-- Секция фото ТОЛЬКО в personalSection -->
+    <!-- Секция фото -->
     <div style="margin-top: 2rem; padding-top: 2rem; border-top: 2px solid #e2e8f0;">
         <h3>Фотография</h3>
         <div id="alertPhoto" class="alert"></div>
@@ -1146,37 +1183,39 @@ async function refreshPreview() {
 }
 
 // Генерация HTML из шаблона с подстановкой данных
+// Генерация HTML из шаблона с подстановкой данных
 function generatePreviewFromTemplate(data, template) {
-        const personalInfo = data.personal_info || {};
-        const education = data.education || [];
-        const workExperience = data.work_experience || [];
-        const skills = data.skills || [];
-        const achievements = data.achievements || [];
-        const languages = data.languages || [];
-        
-        let html = template.html_structure;
-        
-        // Подстановка фото
-        if (data.photo) {
-            html = html.replace(/\{\{photo\}\}/g, data.photo);
-            // Удаляем условные блоки если есть
-            html = html.replace(/\{\{#if photo\}\}/g, '');
-            html = html.replace(/\{\{else\}\}[\s\S]*?\{\{\/if\}\}/g, '');
-            html = html.replace(/\{\{\/if\}\}/g, '');
-        } else {
-            // Удаляем блок с фото, оставляем пустой div
-            html = html.replace(/\{\{#if photo\}\}[\s\S]*?\{\{else\}\}/g, '');
-            html = html.replace(/\{\{\/if\}\}/g, '');
-        }
+    const personalInfo = data.personal_info || {};
+    const education = data.education || [];
+    const workExperience = data.work_experience || [];
+    const skills = data.skills || [];
+    const achievements = data.achievements || [];
+    const languages = data.languages || [];
     
-    // Подстановка личных данных
+    let html = template.html_structure;
+    
+    // Подстановка фото
+    if (data.photo) {
+        html = html.replace(/\{\{photo\}\}/g, data.photo);
+        // Удаляем условные блоки если есть
+        html = html.replace(/\{\{#if photo\}\}/g, '');
+        html = html.replace(/\{\{else\}\}[\s\S]*?\{\{\/if\}\}/g, '');
+        html = html.replace(/\{\{\/if\}\}/g, '');
+    } else {
+        // Удаляем блок с фото, оставляем пустой div
+        html = html.replace(/\{\{#if photo\}\}[\s\S]*?\{\{else\}\}/g, '');
+        html = html.replace(/\{\{\/if\}\}/g, '');
+        html = html.replace(/\{\{photo\}\}/g, ''); // Удаляем пустую переменную
+    }
+    
+    // ========== ИСПРАВЛЕНИЕ: Подстановка ВСЕХ личных данных ==========
     html = html.replace(/\{\{full_name\}\}/g, personalInfo.full_name || 'Ваше Имя');
-    html = html.replace(/\{\{email\}\}/g, personalInfo.email || '');
-    html = html.replace(/\{\{phone\}\}/g, personalInfo.phone || '');
-    html = html.replace(/\{\{address\}\}/g, personalInfo.address || '');
+    html = html.replace(/\{\{email\}\}/g, personalInfo.email || 'email@example.com');
+    html = html.replace(/\{\{phone\}\}/g, personalInfo.phone || '+X XXX XXX XXXX');
+    html = html.replace(/\{\{address\}\}/g, personalInfo.address || 'Город, Страна');
     html = html.replace(/\{\{linkedin\}\}/g, personalInfo.linkedin || '');
     html = html.replace(/\{\{website\}\}/g, personalInfo.website || '');
-    html = html.replace(/\{\{summary\}\}/g, personalInfo.summary || '');
+    html = html.replace(/\{\{summary\}\}/g, personalInfo.summary || 'Краткая информация о себе');
     
     // Подстановка опыта работы
     const workHtml = workExperience.map(exp => `
@@ -1228,7 +1267,6 @@ function generatePreviewFromTemplate(data, template) {
     
     return html;
 }
-
 // Генерация HTML для предпросмотра
 function generatePreviewHTML(data) {
     const personalInfo = data.personal_info || {};
@@ -1461,6 +1499,9 @@ function formatDate(dateString) {
         // ============= ФУНКЦИИ СОХРАНЕНИЯ =============
 
 // Сохранение личной информации
+// Сохранение личной информации
+// Сохранение личной информации
+// Сохранение личной информации
 async function savePersonalInfo(e) {
     e.preventDefault();
     
@@ -1475,12 +1516,29 @@ async function savePersonalInfo(e) {
     };
 
     try {
-        await API.personalInfo.createOrUpdate(resumeId, data);
+        // Проверяем, существует ли уже личная информация
+        let personalInfoExists = false;
+        try {
+            await API.personalInfo.get(resumeId);
+            personalInfoExists = true;
+        } catch (error) {
+            // Если ошибка 404, значит личной информации еще нет
+            personalInfoExists = false;
+        }
+
+        if (personalInfoExists) {
+            // Обновляем существующую
+            await API.personalInfo.update(resumeId, data);
+        } else {
+            // Создаем новую
+            await API.personalInfo.createOrUpdate(resumeId, data);
+        }
+        
         showAlert('alertPersonal', 'Личная информация сохранена!', 'success');
         await refreshPreview();
     } catch (error) {
         console.error('Error saving personal info:', error);
-        showAlert('alertPersonal', 'Ошибка сохранения', 'error');
+        showAlert('alertPersonal', error.detail || 'Ошибка сохранения', 'error');
     }
 }
 
@@ -1641,6 +1699,149 @@ async function saveEducation(e) {
     } catch (error) {
         console.error('Error saving education:', error);
         alert('Ошибка сохранения образования');
+    }
+}
+
+// ============= РЕДАКТИРОВАНИЕ ОПЫТА РАБОТЫ =============
+
+async function editExperience(id) {
+    currentEditId = id;
+    
+    try {
+        // Получаем список опыта работы
+        const experiences = await API.workExperience.list(resumeId);
+        const experience = experiences.find(exp => exp.id === id);
+        
+        if (!experience) {
+            alert('Опыт работы не найден');
+            return;
+        }
+        
+        // Заполняем форму данными
+        document.getElementById('expCompany').value = experience.company;
+        document.getElementById('expPosition').value = experience.position;
+        document.getElementById('expStartDate').value = experience.start_date;
+        document.getElementById('expEndDate').value = experience.end_date || '';
+        document.getElementById('expIsCurrent').checked = experience.is_current;
+        document.getElementById('expDescription').value = experience.description || '';
+        
+        // Блокируем/разблокируем дату окончания
+        document.getElementById('expEndDate').disabled = experience.is_current;
+        
+        // Меняем заголовок модального окна
+        document.getElementById('experienceModalTitle').textContent = 'Редактировать опыт работы';
+        
+        // Открываем модальное окно
+        document.getElementById('experienceModal').classList.add('active');
+    } catch (error) {
+        console.error('Error loading experience for edit:', error);
+        alert('Ошибка загрузки данных');
+    }
+}
+
+// ============= РЕДАКТИРОВАНИЕ ОБРАЗОВАНИЯ =============
+
+async function editEducation(id) {
+    currentEditId = id;
+    
+    try {
+        const educations = await API.education.list(resumeId);
+        const education = educations.find(edu => edu.id === id);
+        
+        if (!education) {
+            alert('Образование не найдено');
+            return;
+        }
+        
+        document.getElementById('eduInstitution').value = education.institution;
+        document.getElementById('eduDegree').value = education.degree;
+        document.getElementById('eduField').value = education.field_of_study;
+        document.getElementById('eduStartDate').value = education.start_date;
+        document.getElementById('eduEndDate').value = education.end_date || '';
+        document.getElementById('eduDescription').value = education.description || '';
+        
+        document.getElementById('educationModalTitle').textContent = 'Редактировать образование';
+        document.getElementById('educationModal').classList.add('active');
+    } catch (error) {
+        console.error('Error loading education for edit:', error);
+        alert('Ошибка загрузки данных');
+    }
+}
+
+// ============= РЕДАКТИРОВАНИЕ НАВЫКА =============
+
+async function editSkill(id) {
+    currentEditId = id;
+    
+    try {
+        const skills = await API.skills.list(resumeId);
+        const skill = skills.find(s => s.id === id);
+        
+        if (!skill) {
+            alert('Навык не найден');
+            return;
+        }
+        
+        document.getElementById('skillName').value = skill.name;
+        document.getElementById('skillLevel').value = skill.level;
+        document.getElementById('skillCategory').value = skill.category;
+        
+        document.getElementById('skillModalTitle').textContent = 'Редактировать навык';
+        document.getElementById('skillModal').classList.add('active');
+    } catch (error) {
+        console.error('Error loading skill for edit:', error);
+        alert('Ошибка загрузки данных');
+    }
+}
+
+// ============= РЕДАКТИРОВАНИЕ ДОСТИЖЕНИЯ =============
+
+async function editAchievement(id) {
+    currentEditId = id;
+    
+    try {
+        const achievements = await API.achievements.list(resumeId);
+        const achievement = achievements.find(a => a.id === id);
+        
+        if (!achievement) {
+            alert('Достижение не найдено');
+            return;
+        }
+        
+        document.getElementById('achievementTitle').value = achievement.title;
+        document.getElementById('achievementDate').value = achievement.date || '';
+        document.getElementById('achievementDescription').value = achievement.description || '';
+        
+        document.getElementById('achievementModalTitle').textContent = 'Редактировать достижение';
+        document.getElementById('achievementModal').classList.add('active');
+    } catch (error) {
+        console.error('Error loading achievement for edit:', error);
+        alert('Ошибка загрузки данных');
+    }
+}
+
+// ============= РЕДАКТИРОВАНИЕ ЯЗЫКА =============
+
+async function editLanguage(id) {
+    currentEditId = id;
+    
+    try {
+        const languages = await API.languages.list(resumeId);
+        const language = languages.find(l => l.id === id);
+        
+        if (!language) {
+            alert('Язык не найден');
+            return;
+        }
+        
+        document.getElementById('languageName').value = language.language;
+        document.getElementById('languageLevel').value = language.proficiency_level;
+        
+        document.getElementById('languageModalTitle').textContent = 'Редактировать язык';
+        document.getElementById('languageModal').classList.add('active');
+    } catch (error) {
+        console.error('Error loading language for edit:', error);
+        alert('Ошибка загрузки данных');
     }
 }
 
