@@ -534,6 +534,10 @@
                 <h3>Последнее обновление</h3>
                 <div class="value" id="lastUpdate">-</div>
             </div>
+            <div class="stat-card">
+    <h3>Всего просмотров</h3>
+    <div class="value" id="totalViews">0</div>
+</div>
         </div>
 
         <!-- Actions Bar -->
@@ -660,49 +664,60 @@
         }
 
         // Отрисовка резюме
-        function renderResumes(resumesList) {
-            const grid = document.getElementById('resumesGrid');
-            grid.innerHTML = '';
+        // В функции renderResumes() измените:
+function renderResumes(resumesList) {
+    const grid = document.getElementById('resumesGrid');
+    grid.innerHTML = '';
 
-            resumesList.forEach(resume => {
-                const card = document.createElement('div');
-                card.className = 'resume-card';
-                card.innerHTML = `
-                    <div class="resume-preview" onclick="window.location.href='/resume-editor.html?id=${resume.id}'">
-                        📄
-                        ${resume.is_primary ? '<span class="resume-badge">Основное</span>' : ''}
-                    </div>
-                    <div class="resume-info">
-                        <h3>${resume.title}</h3>
-                        <div class="resume-meta">
-                            <span>📅 ${formatDate(resume.updated_at)}</span>
-                            <span>${resume.template_name || 'Без шаблона'}</span>
-                        </div>
-                        <div class="resume-actions">
-                            <button onclick="editResume(${resume.id})" title="Редактировать">Редактировать</button>
-                            <button onclick="exportPDF(${resume.id})" title="Скачать PDF">PDF</button>
-                            <button onclick="exportDOCX(${resume.id})" title="Скачать DOCX">DOCX</button>
-                            ${!resume.is_primary ? `<button onclick="setPrimary(${resume.id})" title="Сделать основным">⭐</button>` : ''}
-                            <button onclick="openDeleteModal(${resume.id}, '${resume.title}')" title="Удалить">Удалить</button>
-                        </div>
-                    </div>
-                `;
-                grid.appendChild(card);
-            });
-        }
+    resumesList.forEach(resume => {
+        const card = document.createElement('div');
+        card.className = 'resume-card';
+        card.innerHTML = `
+            <div class="resume-preview" onclick="window.location.href='/resume-editor.html?id=${resume.id}'">
+                📄
+                ${resume.is_primary ? '<span class="resume-badge">Основное</span>' : ''}
+            </div>
+            <div class="resume-info">
+                <h3>${resume.title}</h3>
+                <div class="resume-meta">
+                    <span>📅 ${formatDate(resume.updated_at)}</span>
+                    <span>${resume.template_name || 'Без шаблона'}</span>
+                </div>
+                <!-- ← ДОБАВЬТЕ ЭТО -->
+                <div class="resume-meta" style="margin-top: 0.5rem;">
+                    <span>👁️ ${resume.views_count || 0} просмотров</span>
+                </div>
+                
+                <div class="resume-actions">
+                    <button onclick="editResume(${resume.id})" title="Редактировать">Редактировать</button>
+                    <button onclick="exportPDF(${resume.id})" title="Скачать PDF">PDF</button>
+                    <button onclick="exportDOCX(${resume.id})" title="Скачать DOCX">DOCX</button>
+                    ${!resume.is_primary ? `<button onclick="setPrimary(${resume.id})" title="Сделать основным">⭐</button>` : ''}
+                    <button onclick="openDeleteModal(${resume.id}, '${resume.title}')" title="Удалить">Удалить</button>
+                </div>
+            </div>
+        `;
+        grid.appendChild(card);
+    });
+}
 
         // Обновление статистики
-        function updateStats(resumesList) {
-            document.getElementById('totalResumes').textContent = resumesList.length;
-            
-            const primary = resumesList.find(r => r.is_primary);
-            document.getElementById('primaryResume').textContent = primary ? primary.title : 'Не выбрано';
-            
-            if (resumesList.length > 0) {
-                const latest = resumesList[0];
-                document.getElementById('lastUpdate').textContent = formatDate(latest.updated_at);
-            }
-        }
+        // В функции updateStats() добавьте:
+function updateStats(resumesList) {
+    document.getElementById('totalResumes').textContent = resumesList.length;
+    
+    const primary = resumesList.find(r => r.is_primary);
+    document.getElementById('primaryResume').textContent = primary ? primary.title : 'Не выбрано';
+    
+    if (resumesList.length > 0) {
+        const latest = resumesList[0];
+        document.getElementById('lastUpdate').textContent = formatDate(latest.updated_at);
+        
+        // Подсчет просмотров
+        const totalViews = resumesList.reduce((sum, r) => sum + (r.views_count || 0), 0);
+        document.getElementById('totalViews').textContent = totalViews;
+    }
+}
 
         // Загрузка шаблонов
         async function loadTemplates() {

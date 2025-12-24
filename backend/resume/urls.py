@@ -8,6 +8,9 @@ from .views import (
     ResumeCopyView,
     ResumeSetPrimaryView,
     ResumePreviewView,
+    ResumePublicView,        # ← ДОБАВЬТЕ ЭТО
+    ResumeViewsStatsView,    # ← И ЭТО
+    ResumeIncrementViewsView,
 )
 from .export_views import (
     ResumeExportPDFView,
@@ -34,6 +37,11 @@ urlpatterns = [
     
     # Предпросмотр
     path('<int:pk>/preview/', ResumePreviewView.as_view(), name='preview'),
+    
+    # Публичный просмотр и статистика
+    path('<int:pk>/public/', ResumePublicView.as_view(), name='public'),
+    path('<int:pk>/views-stats/', ResumeViewsStatsView.as_view(), name='views_stats'),
+    path('<int:pk>/increment-views/', ResumeIncrementViewsView.as_view(), name='increment_views'),
     
     # Работа с фотографией
     path('<int:pk>/photo/', ResumePhotoUploadView.as_view(), name='photo_upload'),

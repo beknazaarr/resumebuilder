@@ -82,11 +82,11 @@ class ResumeAdmin(admin.ModelAdmin):
     Админ может только ПРОСМАТРИВАТЬ резюме пользователей.
     Удаление резюме возможно только через управление пользователями.
     """
-    list_display = ('title', 'user', 'user_email', 'template', 'is_primary', 'created_at', 'updated_at')
+    list_display = ('title', 'user', 'user_email', 'template', 'is_primary', 'views_count', 'created_at', 'updated_at')
     list_filter = ('is_primary', 'created_at', 'template', 'user__is_active')
     search_fields = ('title', 'user__username', 'user__email', 'user__first_name', 'user__last_name')
-    readonly_fields = ('user', 'template', 'title', 'photo', 'is_primary', 'created_at', 'updated_at')
-    
+    readonly_fields = ('user', 'template', 'title', 'photo', 'is_primary', 'views_count','created_at', 'updated_at')
+
     inlines = [
         PersonalInfoInline,
         EducationInline,

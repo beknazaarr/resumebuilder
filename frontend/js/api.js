@@ -126,6 +126,17 @@ const API = {
         setPrimary: (id) => apiRequest(`/resumes/${id}/set-primary/`, {
             method: 'POST'
         }),
+         getViewsStats: (id) => apiRequest(`/resumes/${id}/views-stats/`, {
+        method: 'GET'
+        }),
+        getViewsStats: (id) => apiRequest(`/resumes/${id}/views-stats/`, {
+        method: 'GET'
+        })
+        },
+        incrementViews: (id) => apiRequest(`/resumes/${id}/increment-views/`, {
+        method: 'POST'
+        }),
+
 
        exportPDF: async (id) => {
         const token = getToken();

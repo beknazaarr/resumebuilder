@@ -1,6 +1,6 @@
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
-from rest_framework.views import APIView
+from rest_framework.views import APIView  # ← Убедитесь что это есть
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
@@ -50,6 +50,17 @@ class ResumeDetailView(generics.RetrieveAPIView):
 
     def get_queryset(self):
         return Resume.objects.filter(user=self.request.user)
+    
+    # ← ДОБАВЬТЕ ЭТОТ МЕТОД
+    def retrieve(self, request, *args, **kwargs):
+        """Получить резюме и увеличить счетчик просмотров"""
+        instance = self.get_object()
+        
+        # Увеличиваем счетчик при каждом просмотре
+        instance.increment_views()
+        
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
 
 class ResumePreviewView(APIView):
@@ -58,6 +69,7 @@ class ResumePreviewView(APIView):
     
     def get(self, request, pk):
         resume = get_object_or_404(Resume, pk=pk, user=request.user)
+        resume.increment_views()  # Увеличиваем счетчик просмотров при предпросмотре
         
         # Проверяем наличие шаблона
         if not resume.template:
@@ -250,4 +262,92 @@ class ResumeSetPrimaryView(APIView):
         return Response({
             'message': f'Резюме "{resume.title}" установлено как основное',
             'resume': ResumeListSerializer(resume).data
+        })
+    # В конец файла backend/resume/views.py добавьте:
+
+class ResumePublicView(APIView):
+    """
+    Публичный просмотр резюме (без авторизации)
+    Увеличивает счетчик просмотров
+    """
+    permission_classes = [permissions.AllowAny]
+    
+    def get(self, request, pk):
+        """Получить резюме и увеличить счетчик просмотров"""
+        try:
+            resume = Resume.objects.get(pk=pk)
+            
+            # Увеличиваем счетчик просмотров
+            # Можно добавить проверку, чтобы не считать просмотры владельца
+            if not request.user.is_authenticated or request.user != resume.user:
+                resume.increment_views()
+            
+            serializer = ResumeDetailSerializer(resume)
+            return Response(serializer.data)
+            
+        except Resume.DoesNotExist:
+            return Response({
+                'error': 'Резюме не найдено'
+            }, status=status.HTTP_404_NOT_FOUND)
+
+
+# ... весь существующий код views.py
+
+# В КОНЕЦ ФАЙЛА ДОБАВЬТЕ:
+
+class ResumePublicView(APIView):
+    """
+    Публичный просмотр резюме (без авторизации)
+    Увеличивает счетчик просмотров
+    """
+    permission_classes = [permissions.AllowAny]
+    
+    def get(self, request, pk):
+        """Получить резюме и увеличить счетчик просмотров"""
+        try:
+            resume = Resume.objects.get(pk=pk)
+            
+            # Увеличиваем счетчик просмотров
+            # Не считаем просмотры владельца
+            if not request.user.is_authenticated or request.user != resume.user:
+                resume.increment_views()
+            
+            serializer = ResumeDetailSerializer(resume)
+            return Response(serializer.data)
+            
+        except Resume.DoesNotExist:
+            return Response({
+                'error': 'Резюме не найдено'
+            }, status=status.HTTP_404_NOT_FOUND)
+
+
+class ResumeViewsStatsView(APIView):
+    """Статистика просмотров для владельца резюме"""
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get(self, request, pk):
+        """Получить статистику просмотров"""
+        resume = get_object_or_404(Resume, pk=pk, user=request.user)
+        
+        return Response({
+            'resume_id': resume.id,
+            'resume_title': resume.title,
+            'total_views': resume.views_count,
+            'created_at': resume.created_at,
+            'last_updated': resume.updated_at
+        })
+    
+
+class ResumeIncrementViewsView(APIView):
+    """Увеличить счетчик просмотров резюме"""
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def post(self, request, pk):
+        """Увеличить счетчик"""
+        resume = get_object_or_404(Resume, pk=pk, user=request.user)
+        resume.increment_views()
+        
+        return Response({
+            'message': 'Просмотр зафиксирован',
+            'views_count': resume.views_count
         })

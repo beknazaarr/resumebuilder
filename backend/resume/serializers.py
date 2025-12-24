@@ -109,7 +109,7 @@ class ResumeListSerializer(serializers.ModelSerializer):
         model = Resume
         fields = ('id', 'title', 'template', 'template_name', 'personal_info_name', 
                   'photo', 'is_primary', 'has_complete_info', 'created_at', 'updated_at')
-        read_only_fields = ('id', 'created_at', 'updated_at')
+        read_only_fields = ('id', 'created_at', 'updated_at', 'views_count')
     
     def get_personal_info_name(self, obj):
         """Получение имени из личной информации"""
@@ -149,6 +149,7 @@ class ResumeDetailSerializer(serializers.ModelSerializer):
             'personal_info', 'education', 'work_experience', 'skills', 
             'achievements', 'languages',
             'sections_count', 'completion_percentage',
+            'views_count',
             'created_at', 'updated_at'
         )
         read_only_fields = ('id', 'created_at', 'updated_at')

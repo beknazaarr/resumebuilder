@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Просмотр резюме</title>
+    <style>
+        /* Минимальные стили для публичного просмотра */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            margin: 0;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .loading {
+            text-align: center;
+            padding: 4rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="loading" class="loading">
+            <p>Загрузка резюме...</p>
+        </div>
+        <div id="resumeContent"></div>
+    </div>
+
+    <script src="/static/js/api.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const resumeId = urlParams.get('id');
+
+        async function loadPublicResume() {
+            if (!resumeId) {
+                document.getElementById('loading').innerHTML = '<p>ID резюме не указан</p>';
+                return;
+            }
+
+            try {
+                const data = await API.resumes.getPublic(resumeId);
+                
+                // Отобразите данные резюме
+                // Можно использовать тот же генератор HTML, что и в предпросмотре
+                document.getElementById('resumeContent').innerHTML = generateResumeHTML(data);
+                document.getElementById('loading').style.display = 'none';
+                
+            } catch (error) {
+                console.error('Error loading public resume:', error);
+                document.getElementById('loading').innerHTML = '<p>Ошибка загрузки резюме</p>';
+            }
+        }
+
+        function generateResumeHTML(data) {
+            // Используйте упрощенную версию генератора из resume-editor.html
+            const personalInfo = data.personal_info || {};
+            return `
+                <h1>${personalInfo.full_name || 'Резюме'}</h1>
+                <p>Email: ${personalInfo.email || ''}</p>
+                <p>Телефон: ${personalInfo.phone || ''}</p>
+                <!-- Добавьте остальные секции -->
+            `;
+        }
+
+        loadPublicResume();
+    </script>
+</body>
+</html>

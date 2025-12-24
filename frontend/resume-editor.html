@@ -892,6 +892,7 @@
             await loadCurrentPhoto();
             await loadAllData();
             setupEventListeners();
+            await API.resumes.incrementViews(resumeId);
         }
 
         // Загрузка шаблонов
