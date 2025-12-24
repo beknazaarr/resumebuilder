@@ -130,21 +130,21 @@ const API = {
        exportPDF: async (id) => {
         const token = getToken();
     
-    // ← ВРЕМЕННАЯ ОТЛАДКА
         console.log('Export PDF - Token:', token ? 'EXISTS' : 'MISSING');
-        console.log('Export PDF - Token length:', token ? token.length : 0);
     
         try {
         const response = await fetch(`${API_BASE_URL}/resumes/${id}/export/pdf/`, {
-            method: 'GET',
+            method: 'GET',  // ← Должен быть GET, а не POST
             headers: {
                 'Authorization': `Bearer ${token}`
             }
         });
         
-        console.log('Response status:', response.status); // ← ОТЛАДКА
+        console.log('Response status:', response.status);
         
         if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Error response:', errorText);
             throw new Error('Ошибка экспорта');
         }
         
@@ -159,7 +159,7 @@ const API = {
         document.body.removeChild(a);
         } catch (error) {
         console.error('Error exporting PDF:', error);
-        alert('Ошибка при экспорте PDF');
+        alert('Ошибка при экспорте PDF: ' + error.message);
         }
         },
 

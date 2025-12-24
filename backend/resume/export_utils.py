@@ -21,17 +21,37 @@ def generate_html_from_template(resume):
     achievements = resume.achievements.all()
     languages = resume.languages.all()
     
-    # Подстановка фото
+    # ============= ИСПРАВЛЕНИЕ ФОТО =============
     if resume.photo:
-        # Получаем полный URL фото
-        photo_url = resume.photo.url if hasattr(resume.photo, 'url') else str(resume.photo)
-        html = html.replace('{{photo}}', photo_url)
-        # Убираем условные блоки
-        html = html.replace('{{#if photo}}', '')
-        html = html.replace('{{else}}', '<!--')
-        html = html.replace('{{/if}}', '-->')
+        # Получаем ПОЛНЫЙ путь к фото
+        try:
+            # Если это объект ImageField
+            if hasattr(resume.photo, 'path'):
+                import base64
+                with open(resume.photo.path, 'rb') as img_file:
+                    img_data = base64.b64encode(img_file.read()).decode('utf-8')
+                    # Определяем тип изображения
+                    ext = resume.photo.name.split('.')[-1].lower()
+                    mime_type = f'image/{ext}' if ext in ['jpg', 'jpeg', 'png', 'webp'] else 'image/jpeg'
+                    photo_url = f'data:{mime_type};base64,{img_data}'
+            else:
+                photo_url = str(resume.photo)
+        except Exception as e:
+            print(f"Error loading photo: {e}")
+            photo_url = ''
+        
+        if photo_url:
+            html = html.replace('{{photo}}', photo_url)
+            html = html.replace('{{#if photo}}', '')
+            html = html.replace('{{else}}', '<!--')
+            html = html.replace('{{/if}}', '-->')
+        else:
+            # Убираем блок с фото
+            html = html.replace('{{#if photo}}', '<!--')
+            html = html.replace('{{else}}', '')
+            html = html.replace('{{/if}}', '-->')
+            html = html.replace('{{photo}}', '')
     else:
-        # Убираем блок с фото
         html = html.replace('{{#if photo}}', '<!--')
         html = html.replace('{{else}}', '')
         html = html.replace('{{/if}}', '-->')
@@ -47,7 +67,6 @@ def generate_html_from_template(resume):
         html = html.replace('{{website}}', personal_info.website or '')
         html = html.replace('{{summary}}', personal_info.summary or '')
     else:
-        # Заменяем пустыми значениями
         html = html.replace('{{full_name}}', 'Ваше Имя')
         html = html.replace('{{email}}', 'email@example.com')
         html = html.replace('{{phone}}', '+X XXX XXX XXXX')
@@ -89,10 +108,10 @@ def generate_html_from_template(resume):
     html = html.replace('{{education}}', edu_html)
     
     # Подстановка навыков
-    skills_html = '<ul style="list-style: none; padding: 0;">'
+    skills_html = '<ul style="list-style: none; padding: 0; margin: 0;">'
     for skill in skills:
         level_display = dict(skill.LEVEL_CHOICES).get(skill.level, skill.level)
-        skills_html += f'<li style="margin-bottom: 0.5rem;">• {skill.name} ({level_display})</li>'
+        skills_html += f'<li style="margin-bottom: 0.3rem;">• {skill.name} ({level_display})</li>'
     skills_html += '</ul>'
     html = html.replace('{{skills}}', skills_html)
     
@@ -108,37 +127,130 @@ def generate_html_from_template(resume):
         </div>
         '''
     html = html.replace('{{achievements}}', achievements_html)
-    html = html.replace('{{rewards}}', achievements_html)  # На случай если используется {{rewards}}
+    html = html.replace('{{rewards}}', achievements_html)
     
     # Подстановка языков
     languages_html = ''
     for lang in languages:
         level_display = dict(lang.PROFICIENCY_CHOICES).get(lang.proficiency_level, lang.proficiency_level)
-        languages_html += f'<div style="margin-bottom: 0.5rem;">{lang.language} - {level_display}</div>'
+        languages_html += f'<div style="margin-bottom: 0.3rem;">{lang.language} - {level_display}</div>'
     html = html.replace('{{languages}}', languages_html)
     
-    # Оборачиваем в полный HTML документ с CSS
+    # ============= КОМПАКТНЫЙ CSS ДЛЯ ОДНОЙ СТРАНИЦЫ =============
+    pdf_css = f'''
+    {css}
+    
+    /* PDF настройки */
+    @page {{
+        size: A4;
+        margin: 0.5cm; /* Минимальные отступы */
+    }}
+    
+    body {{
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        max-width: 210mm;
+        font-size: 9pt; /* Уменьшен шрифт */
+        line-height: 1.2; /* Компактная высота строк */
+    }}
+    
+    * {{
+        box-sizing: border-box;
+        page-break-inside: avoid;
+    }}
+    
+    /* Компактные заголовки */
+    h1 {{ 
+        font-size: 16pt; 
+        margin: 0 0 0.2em 0;
+        line-height: 1.1;
+    }}
+    
+    h2 {{ 
+        font-size: 12pt; 
+        margin: 0.3em 0 0.2em 0;
+        line-height: 1.1;
+    }}
+    
+    h3 {{ 
+        font-size: 10pt; 
+        margin: 0.2em 0;
+        line-height: 1.1;
+    }}
+    
+    /* Фото компактное */
+    img {{
+        max-width: 80px !important; /* Уменьшили с 150px */
+        max-height: 80px !important;
+        border-radius: 50%;
+        object-fit: cover;
+        page-break-inside: avoid;
+    }}
+    
+    /* Компактные секции */
+    .experience-item,
+    .education-item,
+    .reward-item {{
+        page-break-inside: avoid;
+        margin-bottom: 0.3em; /* Минимальный отступ */
+        padding: 0.2em 0;
+    }}
+    
+    .experience-header,
+    .education-header {{
+        margin-bottom: 0.1em;
+    }}
+    
+    .experience-description,
+    .education-description {{
+        margin-top: 0.1em;
+        font-size: 8pt; /* Еще меньше */
+        line-height: 1.2;
+    }}
+    
+    /* Убираем лишние отступы */
+    ul, ol {{
+        margin: 0.2em 0;
+        padding-left: 1.2em;
+    }}
+    
+    li {{
+        margin-bottom: 0.1em;
+    }}
+    
+    p {{
+        margin: 0.2em 0;
+    }}
+    
+    /* Компактный контейнер */
+    .pdf-container {{
+        width: 100%;
+        max-width: 100%;
+        padding: 0;
+        margin: 0;
+    }}
+    
+    /* Убираем разрывы страниц */
+    div, section, article {{
+        page-break-inside: avoid;
+    }}
+    '''
+    
+    # Оборачиваем в полный HTML
     full_html = f'''
     <!DOCTYPE html>
     <html>
     <head>
         <meta charset="UTF-8">
         <style>
-            {css}
-            
-            /* Дополнительные стили для PDF */
-            body {{
-                margin: 0;
-                padding: 20px;
-            }}
-            @page {{
-                size: A4;
-                margin: 1cm;
-            }}
+            {pdf_css}
         </style>
     </head>
     <body>
-        {html}
+        <div class="pdf-container">
+            {html}
+        </div>
     </body>
     </html>
     '''
@@ -189,7 +301,7 @@ def generate_pdf(resume):
 def generate_docx(resume):
 
     """Генерация DOCX из резюме"""
-    
+
     doc = Document()
     
     # Настройки документа
