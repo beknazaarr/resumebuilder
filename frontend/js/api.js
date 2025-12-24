@@ -177,10 +177,7 @@ const API = {
             throw new Error('Ошибка экспорта');
         }
         
-        // Получаем blob (файл)
         const blob = await response.blob();
-        
-        // Создаём ссылку для скачивания
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;

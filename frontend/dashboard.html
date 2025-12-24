@@ -679,11 +679,11 @@
                             <span>${resume.template_name || 'Без шаблона'}</span>
                         </div>
                         <div class="resume-actions">
-                            <button onclick="editResume(${resume.id})" title="Редактировать">✏️</button>
-                            <button onclick="copyResume(${resume.id})" title="Копировать">📋</button>
-                            <button onclick="exportPDF(${resume.id})" title="Скачать PDF">📥</button>
+                            <button onclick="editResume(${resume.id})" title="Редактировать">Редактировать</button>
+                            <button onclick="exportPDF(${resume.id})" title="Скачать PDF">PDF</button>
+                            <button onclick="exportDOCX(${resume.id})" title="Скачать DOCX">DOCX</button>
                             ${!resume.is_primary ? `<button onclick="setPrimary(${resume.id})" title="Сделать основным">⭐</button>` : ''}
-                            <button onclick="openDeleteModal(${resume.id}, '${resume.title}')" title="Удалить">🗑️</button>
+                            <button onclick="openDeleteModal(${resume.id}, '${resume.title}')" title="Удалить">Удалить</button>
                         </div>
                     </div>
                 `;
@@ -782,6 +782,10 @@
         // Экспорт в PDF
         function exportPDF(id) {
             API.resumes.exportPDF(id);
+        }
+
+        function exportDOCX(id) {
+            API.resumes.exportDOCX(id);
         }
 
         // Установить как основное
