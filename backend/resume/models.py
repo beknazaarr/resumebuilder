@@ -31,6 +31,13 @@ class Resume(models.Model):
         default=False,
         verbose_name='Основное резюме'
     )
+    
+    # ← ДОБАВЬТЕ ЭТО ПОЛЕ
+    views_count = models.PositiveIntegerField(
+        default=0,
+        verbose_name='Количество просмотров'
+    )
+    
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name='Дата создания'
@@ -47,3 +54,9 @@ class Resume(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.title}"
+    
+    # ← ДОБАВЬТЕ ЭТОТ МЕТОД
+    def increment_views(self):
+        """Увеличить счетчик просмотров"""
+        self.views_count += 1
+        self.save(update_fields=['views_count'])
