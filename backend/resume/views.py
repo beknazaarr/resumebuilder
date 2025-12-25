@@ -52,15 +52,7 @@ class ResumeDetailView(generics.RetrieveAPIView):
         return Resume.objects.filter(user=self.request.user)
     
     # ← ДОБАВЬТЕ ЭТОТ МЕТОД
-    def retrieve(self, request, *args, **kwargs):
-        """Получить резюме и увеличить счетчик просмотров"""
-        instance = self.get_object()
-        
-        # Увеличиваем счетчик при каждом просмотре
-        instance.increment_views()
-        
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
+    
 
 
 class ResumePreviewView(APIView):
@@ -345,9 +337,12 @@ class ResumeIncrementViewsView(APIView):
     def post(self, request, pk):
         """Увеличить счетчик"""
         resume = get_object_or_404(Resume, pk=pk, user=request.user)
+        
+        # ← НЕ считаем, если владелец просматривает своё резюме
+        # (опционально, если хотите)
         resume.increment_views()
         
         return Response({
             'message': 'Просмотр зафиксирован',
-            'views_count': resume.views_count
+            'views_count': resume.views_count  # ← Возвращаем актуальное значение
         })

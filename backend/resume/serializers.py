@@ -108,7 +108,7 @@ class ResumeListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Resume
         fields = ('id', 'title', 'template', 'template_name', 'personal_info_name', 
-                  'photo', 'is_primary', 'has_complete_info', 'created_at', 'updated_at')
+                  'photo', 'is_primary', 'has_complete_info', 'views_count', 'created_at', 'updated_at')
         read_only_fields = ('id', 'created_at', 'updated_at', 'views_count')
     
     def get_personal_info_name(self, obj):
