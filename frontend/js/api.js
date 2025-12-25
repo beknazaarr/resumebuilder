@@ -126,84 +126,75 @@ const API = {
         setPrimary: (id) => apiRequest(`/resumes/${id}/set-primary/`, {
             method: 'POST'
         }),
-         getViewsStats: (id) => apiRequest(`/resumes/${id}/views-stats/`, {
-        method: 'GET'
-        }),
         getViewsStats: (id) => apiRequest(`/resumes/${id}/views-stats/`, {
-        method: 'GET'
-        })
-        },
-        incrementViews: (id) => apiRequest(`/resumes/${id}/increment-views/`, {
-        method: 'POST'
+            method: 'GET'
         }),
-
-
-       exportPDF: async (id) => {
-        const token = getToken();
-    
-        console.log('Export PDF - Token:', token ? 'EXISTS' : 'MISSING');
-    
-        try {
-        const response = await fetch(`${API_BASE_URL}/resumes/${id}/export/pdf/`, {
-            method: 'GET',  // ← Должен быть GET, а не POST
-            headers: {
-                'Authorization': `Bearer ${token}`
+        incrementViews: (id) => apiRequest(`/resumes/${id}/increment-views/`, {
+            method: 'POST'
+        }),
+        exportPDF: async (id) => {
+            const token = getToken();
+            
+            console.log('Export PDF - Token:', token ? 'EXISTS' : 'MISSING');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/resumes/${id}/export/pdf/`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Error response:', errorText);
+                    throw new Error('Ошибка экспорта');
+                }
+                
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `resume_${id}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            } catch (error) {
+                console.error('Error exporting PDF:', error);
+                alert('Ошибка при экспорте PDF: ' + error.message);
             }
-        });
-        
-        console.log('Response status:', response.status);
-        
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Error response:', errorText);
-            throw new Error('Ошибка экспорта');
-        }
-        
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `resume_${id}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-        } catch (error) {
-        console.error('Error exporting PDF:', error);
-        alert('Ошибка при экспорте PDF: ' + error.message);
-        }
         },
-
         exportDOCX: async (id) => {
-        const token = getToken();
-        try {
-        const response = await fetch(`${API_BASE_URL}/resumes/${id}/export/docx/`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`
+            const token = getToken();
+            try {
+                const response = await fetch(`${API_BASE_URL}/resumes/${id}/export/docx/`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Ошибка экспорта');
+                }
+                
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `resume_${id}.docx`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            } catch (error) {
+                console.error('Error exporting DOCX:', error);
+                alert('Ошибка при экспорте DOCX');
             }
-        });
-        
-        if (!response.ok) {
-            throw new Error('Ошибка экспорта');
-        }
-        
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `resume_${id}.docx`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-        } catch (error) {
-        console.error('Error exporting DOCX:', error);
-        alert('Ошибка при экспорте DOCX');
-        }
         },
-
-        // ФОТО
         uploadPhoto: async (resumeId, file) => {
             const formData = new FormData();
             formData.append('photo', file);
@@ -224,7 +215,6 @@ const API = {
             
             return await response.json();
         },
-
         deletePhoto: async (resumeId) => {
             const token = getToken();
             const response = await fetch(`${API_BASE_URL}/resumes/${resumeId}/photo/`, {

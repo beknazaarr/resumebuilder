@@ -1,7 +1,8 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.static import serve
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
@@ -97,12 +98,27 @@ urlpatterns += [
          name='language-detail'),
 ]
 
-# Media files (для разработки)
+# ========== КЛЮЧЕВАЯ ЧАСТЬ! ==========
+# Media и Static файлы для development
 if settings.DEBUG:
+    # Media files (загруженные пользователями)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    
+    # ← ВОТ ЭТО РЕШАЕТ ПРОБЛЕМУ С JS!
+    # Раздаём JS, CSS, изображения напрямую из frontend/
+    urlpatterns += [
+        re_path(r'^js/(?P<path>.*)$', serve, {
+            'document_root': settings.STATICFILES_DIRS[0] / 'js',
+        }),
+        re_path(r'^css/(?P<path>.*)$', serve, {
+            'document_root': settings.STATICFILES_DIRS[0] / 'css',
+        }),
+        re_path(r'^images/(?P<path>.*)$', serve, {
+            'document_root': settings.STATICFILES_DIRS[0] / 'images',
+        }),
+    ]
 
-# Frontend маршруты - конкретные пути
+# Frontend HTML страницы (ДОЛЖНЫ БЫТЬ В САМОМ КОНЦЕ!)
 urlpatterns += [
     path('', TemplateView.as_view(template_name='index.html'), name='home'),
     path('index.html', TemplateView.as_view(template_name='index.html'), name='index'),

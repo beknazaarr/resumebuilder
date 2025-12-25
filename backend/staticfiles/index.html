@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Builder - Создайте профессиональное резюме</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        header {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2563eb;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #2563eb;
+        }
+
+        .btn {
+            padding: 0.6rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #2563eb;
+            border: 2px solid #2563eb;
+        }
+
+        .btn-secondary:hover {
+            background: #2563eb;
+            color: white;
+        }
+
+        .hero {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .hero-content h1 {
+            font-size: 3rem;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+            color: #1e293b;
+        }
+
+        .hero-content p {
+            font-size: 1.2rem;
+            color: #64748b;
+            margin-bottom: 2rem;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .hero-image {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 20px 60px rgba(102, 126, 234, 0.4);
+        }
+
+        .resume-preview {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 350px;
+        }
+
+        .resume-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .resume-photo {
+            width: 80px;
+            height: 80px;
+            background: #e5e7eb;
+            border-radius: 50%;
+        }
+
+        .resume-name h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .resume-name p {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .resume-section {
+            margin-bottom: 1rem;
+        }
+
+        .resume-section h4 {
+            font-size: 0.9rem;
+            color: #2563eb;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .resume-line {
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+        }
+
+        .resume-line:nth-child(2) { width: 100%; }
+        .resume-line:nth-child(3) { width: 80%; }
+        .resume-line:nth-child(4) { width: 90%; }
+
+        .features {
+            background: #f8fafc;
+            padding: 5rem 2rem;
+        }
+
+        .features-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #1e293b;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: #64748b;
+            font-size: 1.1rem;
+            margin-bottom: 4rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: #1e293b;
+        }
+
+        .feature-card p {
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        .templates {
+            padding: 5rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .templates-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .template-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .template-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
+
+        .template-preview {
+            height: 300px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+        }
+
+        .template-info {
+            padding: 1.5rem;
+        }
+
+        .template-info h3 {
+            margin-bottom: 0.5rem;
+            color: #1e293b;
+        }
+
+        .template-info p {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .cta {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 5rem 2rem;
+            text-align: center;
+        }
+
+        .cta h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .cta p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .btn-white {
+            background: white;
+            color: #667eea;
+        }
+
+        .btn-white:hover {
+            background: #f8fafc;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+        }
+
+        footer {
+            background: #1e293b;
+            color: white;
+            padding: 3rem 2rem;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 3rem;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section a {
+            color: #94a3b8;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-section a:hover {
+            color: white;
+        }
+
+        .footer-bottom {
+            max-width: 1200px;
+            margin: 2rem auto 0;
+            padding-top: 2rem;
+            border-top: 1px solid #334155;
+            text-align: center;
+            color: #94a3b8;
+        }
+
+        @media (max-width: 768px) {
+            .hero {
+                grid-template-columns: 1fr;
+            }
+
+            .features-grid,
+            .templates-grid,
+            .footer-container {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .hero-content h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">Resume Builder</div>
+            <div class="nav-links">
+                <a href="#features">Возможности</a>
+                <a href="#templates">Шаблоны</a>
+                <a href="#about">Контакты</a>
+                <a href="/login.html" class="btn btn-secondary">Авторизация</a>
+                <a href="/register.html" class="btn btn-primary">Регистрация</a>
+            </div>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Создайте резюме вашей мечты</h1>
+            <p>Создавайте резюме всегда с Resume Builder и воплощайте свои мечты</p>
+            <div class="hero-buttons">
+                <a href="/register.html" class="btn btn-primary">Создать</a>
+                <a href="#templates" class="btn btn-secondary">Выбрать шаблон</a>
+            </div>
+        </div>
+        <div class="hero-image">
+            <div class="resume-preview">
+                <div class="resume-header">
+                    <div class="resume-photo"></div>
+                    <div class="resume-name">
+                        <h3>Владимир Иванов</h3>
+                        <p>Веб-разработчик</p>
+                    </div>
+                </div>
+                <div class="resume-section">
+                    <h4>Опыт работы</h4>
+                    <div class="resume-line"></div>
+                    <div class="resume-line"></div>
+                    <div class="resume-line"></div>
+                </div>
+                <div class="resume-section">
+                    <h4>Образование</h4>
+                    <div class="resume-line"></div>
+                    <div class="resume-line"></div>
+                </div>
+                <div class="resume-section">
+                    <h4>Навыки</h4>
+                    <div class="resume-line"></div>
+                    <div class="resume-line"></div>
+                    <div class="resume-line"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <div class="features-container">
+            <h2 class="section-title">Почему выбирают нас</h2>
+            <p class="section-subtitle">Все инструменты для создания профессионального резюме</p>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📝</div>
+                    <h3>Готовые шаблоны</h3>
+                    <p>Большой выбор профессиональных шаблонов для любой индустрии и уровня карьеры</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">👁️</div>
+                    <h3>Предпросмотр в реальном времени</h3>
+                    <p>Видите результат сразу при редактировании резюме</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📥</div>
+                    <h3>Экспорт PDF и DOCX</h3>
+                    <p>Скачивайте резюме в популярных форматах</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💾</div>
+                    <h3>Сохранение версий</h3>
+                    <p>Храните несколько версий резюме для разных вакансий</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📷</div>
+                    <h3>Загрузка фото</h3>
+                    <p>Добавьте профессиональное фото в резюме</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">✏️</div>
+                    <h3>Легкое редактирование</h3>
+                    <p>Интуитивный интерфейс для быстрого создания резюме</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="templates" id="templates">
+        <h2 class="section-title">Выберите шаблон или создайте свой шаблон</h2>
+        <p class="section-subtitle">Профессиональные шаблоны на любой вкус</p>
+        <div class="templates-grid">
+            <div class="template-card">
+                <div class="template-preview">1</div>
+                <div class="template-info">
+                    <h3>Классический</h3>
+                    <p>Простой и элегантный дизайн для любой профессии</p>
+                </div>
+            </div>
+            <div class="template-card">
+                <div class="template-preview">2</div>
+                <div class="template-info">
+                    <h3>Современный</h3>
+                    <p>Яркий и стильный шаблон для творческих профессий</p>
+                </div>
+            </div>
+            <div class="template-card">
+                <div class="template-preview">3</div>
+                <div class="template-info">
+                    <h3>Минималистичный</h3>
+                    <p>Лаконичный дизайн с акцентом на содержание</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta">
+        <h2>Готовы создать своё резюме?</h2>
+        <p>Присоединяйтесь к тысячам пользователей, которые уже нашли работу своей мечты</p>
+        <a href="/register.html" class="btn btn-white">Начать бесплатно</a>
+    </section>
+
+    <footer>
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>Resume Builder</h3>
+                <p>Создавайте профессиональное резюме за несколько минут</p>
+            </div>
+            <div class="footer-section">
+                <h3>Навигация</h3>
+                <ul>
+                    <li><a href="#features">Возможности</a></li>
+                    <li><a href="#templates">Шаблоны</a></li>
+                    <li><a href="#about">О нас</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Контакты</h3>
+                <ul>
+                    <li><a href="#">Email: info@resumebuilder.kg</a></li>
+                    <li><a href="#">Телефон: +996 XXX XXX XXX</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Resume Builder. Все права защищены.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Проверка авторизации при загрузке
+        window.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('access_token');
+            if (token) {
+                // Пользователь уже авторизован, перенаправляем на dashboard
+                window.location.href = '/dashboard.html';
+            }
+        });
+    </script>
+</body>
+</html>
