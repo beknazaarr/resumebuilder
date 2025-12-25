@@ -61,7 +61,7 @@ class ResumePreviewView(APIView):
     
     def get(self, request, pk):
         resume = get_object_or_404(Resume, pk=pk, user=request.user)
-        resume.increment_views()  # Увеличиваем счетчик просмотров при предпросмотре
+        # resume.increment_views()   Увеличиваем счетчик просмотров при предпросмотре
         
         # Проверяем наличие шаблона
         if not resume.template:
@@ -335,7 +335,6 @@ class ResumeIncrementViewsView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     
     def post(self, request, pk):
-        """Увеличить счетчик"""
         resume = get_object_or_404(Resume, pk=pk, user=request.user)
         
         # ← НЕ считаем, если владелец просматривает своё резюме
